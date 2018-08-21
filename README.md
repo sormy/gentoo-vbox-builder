@@ -21,6 +21,10 @@ Usually you just need to run script and wait until it will finish the job:
 gentoo-vbox-builder
 ```
 
+## Examples
+
+![Gentoo AMD64 / Use LiveCD Kernel](/screenshots/gentoo-amd64-use-livecd-kernel.png?raw=true)
+
 ## Reporting bugs
 
 Please use the GitHub issue tracker for any bugs or feature suggestions:
