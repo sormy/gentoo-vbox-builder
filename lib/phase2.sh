@@ -116,8 +116,15 @@ eoutdent
 
 ################################################################################
 
+einfo "Installing LiveCD's kernel configuration..."
+
+eexec mkdir -p /mnt/gentoo/etc/kernels
+eexec cp -v /etc/kernels/* /mnt/gentoo/etc/kernels
+
+################################################################################
+
 if eon "$USE_LIVECD_KERNEL"; then
-    einfo "Installing LiveCD kernel..."
+    einfo "Installing LiveCD's kernel/initramfs/modules..."
 
     LIVECD_KERNEL_VERSION=$(cat /proc/version | cut -d" " -f3)
     KERNEL_ARCH_SUFFIX=$(echo "$GENTOO_ARCH" | sed "s/^amd64$/x86_64/")
@@ -130,13 +137,6 @@ if eon "$USE_LIVECD_KERNEL"; then
 
     eexec cp -vR "/lib/modules/$LIVECD_KERNEL_VERSION" "/mnt/gentoo/lib/modules/"
 fi
-
-################################################################################
-
-einfo "Installing LiveCD's kernel configuration..."
-
-eexec mkdir -p /mnt/gentoo/etc/kernels
-eexec cp -v /etc/kernels/* /mnt/gentoo/etc/kernels
 
 ################################################################################
 
