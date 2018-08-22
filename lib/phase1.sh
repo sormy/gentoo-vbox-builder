@@ -16,6 +16,7 @@
 # input WGET_OPTS
 
 # output GENTOO_LIVECD_TMP
+# output GUEST_INIT_FILE
 
 set -e
 

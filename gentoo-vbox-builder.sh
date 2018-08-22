@@ -175,6 +175,10 @@ handle_exit() {
     if [ -n "$GENTOO_LIVECD_TMP" ] && [ -e "$GENTOO_LIVECD_TMP" ]; then
         rm  "$GENTOO_LIVECD_TMP"
     fi
+
+    if [ -n "$GUEST_INIT_FILE" ] && [ -e "$GUEST_INIT_FILE" ]; then
+        rm "$GUEST_INIT_FILE"
+    fi
 }
 
 handle_error() {
