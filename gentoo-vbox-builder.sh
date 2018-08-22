@@ -12,7 +12,7 @@ source "$SCRIPT_DIR/lib/elib.sh"
 
 APP_NAME="gentoo-vbox-builder"
 APP_DESCRIPTION="Gentoo VirtualBox Image Builder"
-APP_VERSION="1.0.0"
+APP_VERSION="1.0.1"
 
 # Gentoo mirror.
 GENTOO_MIRROR="http://distfiles.gentoo.org"
