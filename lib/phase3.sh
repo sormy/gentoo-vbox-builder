@@ -10,7 +10,7 @@ set -e
 
 ################################################################################
 
-einfo "Upading configuration..."
+einfo "Updating configuration..."
 
 eexec env-update
 eexec source /etc/profile
