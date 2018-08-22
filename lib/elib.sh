@@ -35,7 +35,7 @@ eerror() {
 
 eecho() {
     # global ELOG_INDENT
-    echo "$ELOG_INDENT  " "$@"
+    echo "  $ELOG_INDENT" "$@"
 }
 
 eindent_reset() {
@@ -50,7 +50,7 @@ eindent() {
 
 eoutdent() {
     # global ELOG_INDENT
-    ELOG_INDENT="${ELOG_INDENT::${#ELOG_INDENT}-2}"
+    [ -n "$ELOG_INDENT" ] && ELOG_INDENT="${ELOG_INDENT::${#ELOG_INDENT}-2}"
 }
 
 edie() {
