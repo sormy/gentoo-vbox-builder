@@ -159,7 +159,7 @@ OPT="$(opt_get "--color")";             [ -z "$OPT" ] || COLOR="$OPT"
 GENTOO_ARCH="$(echo "$GENTOO_PROFILE" | grep -q '^\(amd64\|x32\)' && echo "amd64" || echo "x86")"
 
 # Autodetect guest name based on Gentoo architecture.
-GUEST_NAME="Gentoo $GENTOO_ARCH"
+GUEST_NAME="${GUEST_NAME:-Gentoo $GENTOO_ARCH}"
 
 # Autodetect OS type name based on Gentoo architecture.
 GUEST_OS_TYPE="$([ "$GENTOO_ARCH" = "x86" ] && echo "Gentoo" || echo "Gentoo_64")"
@@ -195,6 +195,16 @@ trap 'handle_error ${LINENO}' ERR
 ################################################################################
 
 einfo "$APP_DESCRIPTION $APP_VERSION"
+
+einfo "The following parameters will be used:"
+
+eindent
+
+einfo "Guest Name: $GUEST_NAME"
+einfo "Host SSH Port: $HOST_SSH_PORT"
+einfo "Gentoo Profile: $GENTOO_PROFILE ($GENTOO_ARCH)"
+
+eoutdent
 
 einfo "Started at $(date)"
 

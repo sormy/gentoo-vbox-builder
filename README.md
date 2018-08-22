@@ -1,4 +1,4 @@
-# GENTOO VIRTUAL BOX IMAGE BUILDER
+# Gentoo VirtualBox Image Builder
 
 ## Description
 
