@@ -84,13 +84,17 @@ elog_set_colors() {
 ecmd() {
     local cmd
     local arg
+    local line_count
+
     for arg in "$@"; do
-        if echo "$arg" | grep -q '["`$\\[:space:]]'; then
+        line_count="$(echo "$arg" | wc -l)"
+        if [ "$line_count" -gt 1 ] || echo "$arg" | grep -q '["`$\\[:space:]]'; then
             cmd="$cmd \"$(echo "$arg" | sed -e 's/\(["`$\\]\)/\\\1/g')\""
         else
             cmd="$cmd $arg"
         fi
     done
+
     echo "${cmd:1}"
 }
 
