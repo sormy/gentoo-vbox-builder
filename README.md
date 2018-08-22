@@ -7,7 +7,7 @@ Unattended quick installation script for Gentoo on local VirtualBox.
 ## Prerequisites
 
 - Bash.
-- Virtual Box.
+- VirtualBox.
 - OpenSSH.
 - Standard userspace utilities like wget/curl etc.
 
