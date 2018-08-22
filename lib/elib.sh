@@ -85,7 +85,7 @@ ecmd() {
     local cmd
     local arg
     for arg in "$@"; do
-        if echo "$arg" | grep -q '["`$\\[:blank:]]'; then
+        if echo "$arg" | grep -q '["`$\\[:space:]]'; then
             cmd="$cmd \"$(echo "$arg" | sed -e 's/\(["`$\\]\)/\\\1/g')\""
         else
             cmd="$cmd $arg"
