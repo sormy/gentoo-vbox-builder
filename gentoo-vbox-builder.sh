@@ -7,15 +7,20 @@ SCRIPT_DIR="$( cd "$(dirname "$0")" ; pwd -P )"
 source "$SCRIPT_DIR/lib/opt.sh"
 source "$SCRIPT_DIR/lib/alib.sh"
 source "$SCRIPT_DIR/lib/elib.sh"
+source "$SCRIPT_DIR/lib/gentoo.sh"
 
 ################################################################################
 
 APP_NAME="gentoo-vbox-builder"
 APP_DESCRIPTION="Gentoo VirtualBox Image Builder"
-APP_VERSION="1.0.1"
+APP_VERSION="1.0.2"
 
 # Gentoo mirror.
 GENTOO_MIRROR="http://distfiles.gentoo.org"
+
+# Current Gentoo GPG public key ID.
+# See more here: https://www.gentoo.org/downloads/signatures/
+GENTOO_GPG_KEYS="$(cat "$SCRIPT_DIR/gentoo-gpg-keys.txt" | grep -v '^#')"
 
 # Gentoo profile.
 GENTOO_PROFILE="amd64"
@@ -52,6 +57,9 @@ HOST_SSH_PORT="2222"
 
 # If you really want to get instance as soon as possible.
 USE_LIVECD_KERNEL="on"
+
+# Boot using admincd instead of minimal install livecd (useful if livecd is broken).
+USE_ADMINCD="off"
 
 # Target disk to install.
 TARGET_DISK="/dev/sda"
@@ -103,6 +111,7 @@ Options:
     --host-ssh-port <number>        (default is $HOST_SSH_PORT)
     --ssh-public-key <key>          (default is from ~/.ssh/id_rsa.pub)
     --use-livecd-kernel <bool>      (default is "$USE_LIVECD_KERNEL")
+    --use-admincd <bool>            (default is "$USE_ADMINCD")
     --color <bool>                  (default is "$COLOR")
     --version
     --help
@@ -126,8 +135,9 @@ opt_config "
     --guest-mem-size \
     --guest-cpus \
     --host-ssh-port \
-    --use-livecd-kernel \
     --ssh-public-key \
+    --use-livecd-kernel \
+    --use-admincd \
     --color \
 "
 
@@ -153,6 +163,7 @@ OPT="$(opt_get "--guest-cpus")";        [ -z "$OPT" ] || GUEST_CPUS="$OPT"
 OPT="$(opt_get "--host-ssh-port")";     [ -z "$OPT" ] || HOST_SSH_PORT="$OPT"
 OPT="$(opt_get "--ssh-public-key")";    [ -z "$OPT" ] || SSH_PUBLIC_KEY="$OPT"
 OPT="$(opt_get "--use-livecd-kernel")"; [ -z "$OPT" ] || USE_LIVECD_KERNEL="$OPT"
+OPT="$(opt_get "--use-admincd")";       [ -z "$OPT" ] || USE_ADMINCD="$OPT"
 OPT="$(opt_get "--color")";             [ -z "$OPT" ] || COLOR="$OPT"
 
 # Autodetect Gentoo architecture based on profile name.
@@ -218,6 +229,7 @@ einfo "PHASE 1: Prepare Instance..."
 
 eindent
 
+# all global variables are shared
 source "$SCRIPT_DIR/lib/phase1.sh"
 
 eoutdent
@@ -226,8 +238,11 @@ einfo "PHASE 2: Prepare Root..."
 
 eindent
 
-cat "$SCRIPT_DIR/lib/elib.sh" "$SCRIPT_DIR/lib/phase2.sh" | \
-    ssh $SSH_OPTS "root@localhost" -p  "$HOST_SSH_PORT" \
+cat "$SCRIPT_DIR/lib/elib.sh" \
+    "$SCRIPT_DIR/lib/gentoo.sh" \
+    "$SCRIPT_DIR/lib/phase2.sh" \
+    | ssh $SSH_OPTS "root@localhost" \
+        -p "$HOST_SSH_PORT" \
         "ELOG_INDENT=\"$ELOG_INDENT\"" \
         "ELOG_COLOR_OK=\"$ELOG_COLOR_OK\"" \
         "ELOG_COLOR_ERROR=\"$ELOG_COLOR_ERROR\"" \
@@ -241,6 +256,7 @@ cat "$SCRIPT_DIR/lib/elib.sh" "$SCRIPT_DIR/lib/phase2.sh" | \
         "PARTITION_SWAP_SIZE=\"$PARTITION_SWAP_SIZE\"" \
         "USE_LIVECD_KERNEL=\"$USE_LIVECD_KERNEL\"" \
         "WGET_OPTS=\"$WGET_OPTS\"" \
+        "GENTOO_GPG_KEYS=\"$GENTOO_GPG_KEYS\"" \
         "bash -s"
 
 eoutdent
@@ -249,8 +265,10 @@ einfo "PHASE 3: Build Root..."
 
 eindent
 
-cat "$SCRIPT_DIR/lib/elib.sh" "$SCRIPT_DIR/lib/phase3.sh" | \
-    ssh $SSH_OPTS "root@localhost" -p "$HOST_SSH_PORT" \
+cat "$SCRIPT_DIR/lib/elib.sh" \
+    "$SCRIPT_DIR/lib/phase3.sh" \
+    | ssh $SSH_OPTS "root@localhost" \
+        -p "$HOST_SSH_PORT" \
         "ELOG_INDENT=\"$ELOG_INDENT\"" \
         "ELOG_COLOR_OK=\"$ELOG_COLOR_OK\"" \
         "ELOG_COLOR_ERROR=\"$ELOG_COLOR_ERROR\"" \

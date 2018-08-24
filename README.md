@@ -7,8 +7,8 @@ Unattended quick installation script for Gentoo on local VirtualBox.
 ## Prerequisites
 
 - VirtualBox
-- OpenSSH
-- bash, curl, wget, grep, sed, coreutils
+- openssh, openssl, bash, curl, wget, grep, sed, coreutils
+- (optional) gnupg (for livecd/admincd GPG validation)
 
 ## Usage
 

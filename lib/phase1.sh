@@ -14,6 +14,8 @@
 # input GENTOO_ARCH
 # input GENTOO_LIVECD_ISO
 # input WGET_OPTS
+# input GENTOO_GPG_KEYS
+# input USE_ADMINCD
 
 # output GENTOO_LIVECD_TMP
 # output GUEST_INIT_FILE
@@ -23,15 +25,23 @@ set -e
 ################################################################################
 
 if [ -z "$GENTOO_LIVECD_ISO" ]; then
-    einfo "Downloading latest Gentoo LiveCD..."
+    einfo "Downloading Gentoo LiveCD..."
+
+    eindent
+
+    LIVECD_FILTER="$(eon "$USE_ADMINCD" && echo admincd || echo minimal)"
 
     GENTOO_LIVECD_META_URL="$GENTOO_MIRROR/releases/$GENTOO_ARCH/autobuilds/latest-iso.txt"
-    GENTOO_LIVECD_REL_PATH="$(curl -s "$GENTOO_LIVECD_META_URL" | grep -v "^#" | grep minimal | cut -d" " -f1)"
+    GENTOO_LIVECD_REL_PATH="$(curl -s "$GENTOO_LIVECD_META_URL" | grep -v "^#" | grep $LIVECD_FILTER | cut -d" " -f1)"
     GENTOO_LIVECD_URL="$GENTOO_MIRROR/releases/$GENTOO_ARCH/autobuilds/$GENTOO_LIVECD_REL_PATH"
     GENTOO_LIVECD_TMP="/tmp/$(basename "$GENTOO_LIVECD_REL_PATH")"
     GENTOO_LIVECD_ISO="$GENTOO_LIVECD_TMP"
 
-    eexec wget $WGET_OPTS -O "$GENTOO_LIVECD_TMP" "$GENTOO_LIVECD_URL"
+    einfo "Downloading: $GENTOO_LIVECD_URL"
+
+    download_distfile_safe "$GENTOO_LIVECD_URL" "$GENTOO_LIVECD_TMP"
+
+    eoutdent
 fi
 
 ################################################################################

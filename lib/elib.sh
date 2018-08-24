@@ -7,6 +7,7 @@ COLOR_RESET=$'\033[00m'
 
 # global ELOG_INDENT
 # global ELOG_COLOR_OK
+# global ELOG_COLOR_WARN
 # global ELOG_COLOR_ERROR
 # global ELOG_COLOR_QUOTE
 # global ELOG_COLOR_RESET
@@ -24,6 +25,13 @@ einfo() {
     # global ELOG_COLOR_OK
     # global ELOG_COLOR_RESET
     echo " $ELOG_COLOR_OK*$ELOG_COLOR_RESET$ELOG_INDENT" "$@"
+}
+
+ewarn() {
+    # global ELOG_INDENT
+    # global ELOG_COLOR_WARN
+    # global ELOG_COLOR_RESET
+    echo " $ELOG_COLOR_WARN*$ELOG_COLOR_RESET$ELOG_INDENT" "$@"
 }
 
 eerror() {
@@ -60,6 +68,7 @@ edie() {
 
 elog_enable_colors() {
     ELOG_COLOR_OK="$COLOR_GREEN"
+    ELOG_COLOR_WARN="$COLOR_YELLOW"
     ELOG_COLOR_ERROR="$COLOR_RED"
     ELOG_COLOR_RESET="$COLOR_RESET"
     ELOG_COLOR_QUOTE="$COLOR_YELLOW"
@@ -67,6 +76,7 @@ elog_enable_colors() {
 
 elog_disable_colors() {
     ELOG_COLOR_OK=""
+    ELOG_COLOR_WARN=""
     ELOG_COLOR_ERROR=""
     ELOG_COLOR_RESET=""
     ELOG_COLOR_QUOTE=""

@@ -69,21 +69,22 @@ einfo "Installing stage3..."
 
 eindent
 
-einfo "Downloading..."
-
 STAGE3_PATH_URL="$GENTOO_MIRROR/releases/$GENTOO_ARCH/autobuilds/latest-stage3-$GENTOO_PROFILE.txt"
 STAGE3_PATH="$(curl -s "$STAGE3_PATH_URL" | grep -v "^#" | cut -d" " -f1)"
 STAGE3_URL="$GENTOO_MIRROR/releases/$GENTOO_ARCH/autobuilds/$STAGE3_PATH"
+STAGE3_FILE="$(basename "$STAGE3_URL")"
 
-eexec wget $WGET_OPTS "$STAGE3_URL"
+einfo "Downloading: $STAGE3_URL"
+
+download_distfile_safe "$STAGE3_URL" "$STAGE3_FILE"
 
 einfo "Extracting..."
 
-eexec tar xpf "$(basename "$STAGE3_URL")" --xattrs-include='*.*' --numeric-owner
+eexec tar xpf "$STAGE3_FILE" --xattrs-include='*.*' --numeric-owner
 
 einfo "Cleaning up..."
 
-eexec rm "$(basename "$STAGE3_URL")"
+eexec rm stage3-*
 
 eoutdent
 
@@ -99,18 +100,20 @@ eexec mkdir -p /mnt/gentoo/etc/portage/repos.conf
 eexec cp /mnt/gentoo/usr/share/portage/config/repos.conf \
     /mnt/gentoo/etc/portage/repos.conf/gentoo.conf
 
-einfo "Downloading..."
-
 PORTAGE_URL="$GENTOO_MIRROR/releases/snapshots/current/portage-latest.tar.xz"
-eexec wget $WGET_OPTS "$PORTAGE_URL"
+PORTAGE_FILE="$(basename "$PORTAGE_URL")"
+
+einfo "Downloading: $PORTAGE_URL"
+
+download_portage_safe "$PORTAGE_URL" "$PORTAGE_FILE"
 
 einfo "Extracting..."
 
-eexec tar xf "$(basename "$PORTAGE_URL")" -C usr --xattrs-include='*.*' --numeric-owner
+eexec tar xf "$PORTAGE_FILE" -C usr --xattrs-include='*.*' --numeric-owner
 
 einfo "Cleaning up..."
 
-eexec rm "$(basename "$PORTAGE_URL")"
+eexec rm portage-latest.*
 
 eoutdent
 
