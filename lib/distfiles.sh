@@ -58,6 +58,8 @@ download_portage_safe() {
     eexec wget $WGET_OPTS -O "$file.md5sum" "$url.md5sum"
     eexec wget $WGET_OPTS -O "$file.gpgsig" "$url.gpgsig"
 
+    einfo "Verifying md5 hash..."
+
     expected_hash="$(cat "$file.md5sum" | grep -v '^[#-]' | cut -d" " -f1)"
     actual_hash="$(openssl dgst -r -md5 "$file" | cut -d" " -f1)"
 
