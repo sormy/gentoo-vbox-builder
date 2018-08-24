@@ -7,7 +7,7 @@ SCRIPT_DIR="$( cd "$(dirname "$0")" ; pwd -P )"
 source "$SCRIPT_DIR/lib/opt.sh"
 source "$SCRIPT_DIR/lib/alib.sh"
 source "$SCRIPT_DIR/lib/elib.sh"
-source "$SCRIPT_DIR/lib/gentoo.sh"
+source "$SCRIPT_DIR/lib/distfiles.sh"
 
 ################################################################################
 
@@ -239,7 +239,7 @@ einfo "PHASE 2: Prepare Root..."
 eindent
 
 cat "$SCRIPT_DIR/lib/elib.sh" \
-    "$SCRIPT_DIR/lib/gentoo.sh" \
+    "$SCRIPT_DIR/lib/distfiles.sh" \
     "$SCRIPT_DIR/lib/phase2.sh" \
     | ssh $SSH_OPTS "root@localhost" \
         -p "$HOST_SSH_PORT" \
