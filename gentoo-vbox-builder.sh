@@ -4,9 +4,13 @@ SCRIPT_DIR="$( cd "$(dirname "$0")" ; pwd -P )"
 
 ################################################################################
 
+# shellcheck source=lib/opt.sh
 source "$SCRIPT_DIR/lib/opt.sh"
+# shellcheck source=lib/alib.sh
 source "$SCRIPT_DIR/lib/alib.sh"
+# shellcheck source=lib/elib.sh
 source "$SCRIPT_DIR/lib/elib.sh"
+# shellcheck source=lib/distfiles.sh
 source "$SCRIPT_DIR/lib/distfiles.sh"
 
 ################################################################################
