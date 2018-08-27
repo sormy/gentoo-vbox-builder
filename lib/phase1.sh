@@ -13,7 +13,7 @@
 # input GENTOO_MIRROR
 # input GENTOO_ARCH
 # input GENTOO_LIVECD_ISO
-# input WGET_OPTS
+# input CURL_OPTS
 # input GENTOO_GPG_KEYS
 # input USE_ADMINCD
 
@@ -56,11 +56,28 @@ fi
 
 ################################################################################
 
-if VBoxManage list vms| grep -q '^"'"$GUEST_NAME"'"'; then
+if VBoxManage list vms | grep -q '^"'"$GUEST_NAME"'"'; then
     einfo "Removing existing guest..."
 
     eexec VBoxManage unregistervm "$GUEST_NAME" --delete
 fi
+
+################################################################################
+
+einfo "Checking if host SSH port is available..."
+
+RUNNING_VMS="$(VBoxManage list runningvms | sed -e 's/^.*{\([^}]*\)}$/\1/')"
+
+for VM in $RUNNING_VMS; do
+    if VBoxManage showvminfo "$VM" \
+        | grep -e 'NIC.*Rule' \
+        | grep -e 'host port = \d\{1,\}' -o \
+        | sed -e 's/^.* = //' \
+        | grep -q "^$HOST_SSH_PORT\$"
+    then
+        edie "The host port is busy by one of running VMs."
+    fi
+done
 
 ################################################################################
 
@@ -100,7 +117,7 @@ eexec VBoxManage storagectl "$GUEST_NAME" \
 
 ################################################################################
 
-einfo "Attaching dvd to guest..."
+einfo "Attaching DVD drive to guest..."
 
 eexec VBoxManage storageattach "$GUEST_NAME" \
     --storagectl SATA \
@@ -130,8 +147,8 @@ eexec VBoxManage storageattach "$GUEST_NAME" \
 
 einfo "Running guest..."
 
-# TODO: Unstable "keyboardputstring" with "--type headless" for some reason
 eexec VBoxManage startvm "$GUEST_NAME" \
+    --type headless
 
 sleep 10
 

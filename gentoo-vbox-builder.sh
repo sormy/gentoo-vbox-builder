@@ -17,17 +17,19 @@ source "$SCRIPT_DIR/lib/distfiles.sh"
 
 APP_NAME="gentoo-vbox-builder"
 APP_DESCRIPTION="Gentoo VirtualBox Image Builder"
-APP_VERSION="1.0.2"
+APP_VERSION="1.0.3"
 
 # Gentoo mirror.
 GENTOO_MIRROR="http://distfiles.gentoo.org"
 
-# Current Gentoo GPG public key ID.
-# See more here: https://www.gentoo.org/downloads/signatures/
+# Current Gentoo GPG public key IDs: https://www.gentoo.org/downloads/signatures/
 GENTOO_GPG_KEYS="$(cat "$SCRIPT_DIR/gentoo-gpg-keys.txt" | grep -v '^#')"
 
-# Gentoo profile.
-GENTOO_PROFILE="amd64"
+# Gentoo stage3.
+GENTOO_STAGE3="amd64"
+
+# Gentoo profile. Blank indicates that stage3 default profile should be used.
+GENTOO_PROFILE=""
 
 # Detect Gentoo architecture based on provided profile name.
 GENTOO_ARCH=""
@@ -60,7 +62,7 @@ GUEST_SSH_PORT="22"
 HOST_SSH_PORT="2222"
 
 # If you really want to get instance as soon as possible.
-USE_LIVECD_KERNEL="on"
+USE_LIVECD_KERNEL="off"
 
 # Boot using admincd instead of minimal install livecd (useful if livecd is broken).
 USE_ADMINCD="off"
@@ -77,8 +79,8 @@ PARTITION_SWAP_SIZE="1G"
 # SSH public key to use.
 SSH_PUBLIC_KEY="$(cat "$HOME/.ssh/id_rsa.pub")"
 
-# Wget default options.
-WGET_OPTS="--quiet"
+# Curl default options.
+CURL_OPTS="--silent"
 
 # Emerge default options.
 EMERGE_OPTS="--quiet"
@@ -100,25 +102,73 @@ COLOR="on"
 ################################################################################
 
 show_help() {
+
+GENTOO_STAGE3_LIST="$(
+    curl -s http://distfiles.gentoo.org/releases/{x86,amd64}/autobuilds/ \
+        | grep -e '"latest-stage3-\S*\.txt"' -o \
+        | sed -e 's/"//g' -e 's/^latest-stage3-//' -e 's/\.txt$//'
+)"
+
+GENTOO_PROFILE_LIST="$(
+    curl -s https://raw.githubusercontent.com/gentoo/gentoo/master/profiles/profiles.desc \
+        | sed 's/ \{1,\}/ /g' \
+        | grep -e '^\(amd64\|x86\) ' \
+        | cut -d ' ' -f 2
+)"
+
 cat << END
 $APP_NAME: $APP_DESCRIPTION v$APP_VERSION
 Usage:
     $(basename "$0") [options]
 Options:
     --gentoo-mirror <url>           (default is "$GENTOO_MIRROR")
+        Set to use specific gentoo mirror instead of default one.
+
+    --gentoo-stage3 <name>          (default is "$GENTOO_STAGE3")
+        Bootstrap using this stage3:
+$(echo "$GENTOO_STAGE3_LIST" | sed 's/^/          * /')
+
     --gentoo-profile <name>         (default is "$GENTOO_PROFILE")
+        Switch to this profile during installation:
+$(echo "$GENTOO_PROFILE_LIST" | sed 's/^/          * /')
+
     --gentoo-livecd-iso <path>      (default is autodetected)
+        Set to use custom livecd file and don't download latest from server.
+
     --guest-name <name>             (default is "Gentoo %ARCH%")
+        Guest name.
+
     --guest-disk-size <size/mb>     (default is $GUEST_DISK_SIZE)
+        Hard disk size to share with guest.
+
     --guest-mem-size <size/mb>      (default is $GUEST_MEM_SIZE)
+        Memory size to share with guest.
+
     --guest-cpus <number>           (default is $GUEST_CPUS)
+        Number of CPUs to share with guest.
+
     --host-ssh-port <number>        (default is $HOST_SSH_PORT)
+        Host port that should be used for guest ssh.
+
     --ssh-public-key <key>          (default is from ~/.ssh/id_rsa.pub)
+        Set to use specific public ssh key for bootstrap.
+
     --use-livecd-kernel <bool>      (default is "$USE_LIVECD_KERNEL")
+        Use precompiled livecd kernel from livecd. This options will save
+        time on getting bootable system.
+
     --use-admincd <bool>            (default is "$USE_ADMINCD")
+        Use admincd instead of minimal install cd. Could be helpful if minimal
+        install cd is broken for some reason.
+
     --color <bool>                  (default is "$COLOR")
+        Enable or disable colors in output.
+
     --version
+        Show version.
+
     --help
+        Show this screen.
 END
 }
 
@@ -132,6 +182,7 @@ set -e
 
 opt_config "
     --gentoo-mirror \
+    --gentoo-stage3 \
     --gentoo-profile \
     --gentoo-livecd-iso \
     --guest-name \
@@ -157,21 +208,22 @@ if [ "$(opt_cmd)" == "version" ]; then
     exit
 fi
 
-OPT="$(opt_get "--gentoo-mirror")";     [ -z "$OPT" ] || GENTOO_MIRROR="$OPT"
-OPT="$(opt_get "--gentoo-profile")";    [ -z "$OPT" ] || GENTOO_PROFILE="$OPT"
-OPT="$(opt_get "--gentoo-livecd-iso")"; [ -z "$OPT" ] || GENTOO_LIVECD_ISO="$OPT"
-OPT="$(opt_get "--guest-name")";        [ -z "$OPT" ] || GUEST_NAME="$OPT"
-OPT="$(opt_get "--guest-disk-size")";   [ -z "$OPT" ] || GUEST_DISK_SIZE="$OPT"
-OPT="$(opt_get "--guest-mem-size")";    [ -z "$OPT" ] || GUEST_MEM_SIZE="$OPT"
-OPT="$(opt_get "--guest-cpus")";        [ -z "$OPT" ] || GUEST_CPUS="$OPT"
-OPT="$(opt_get "--host-ssh-port")";     [ -z "$OPT" ] || HOST_SSH_PORT="$OPT"
-OPT="$(opt_get "--ssh-public-key")";    [ -z "$OPT" ] || SSH_PUBLIC_KEY="$OPT"
-OPT="$(opt_get "--use-livecd-kernel")"; [ -z "$OPT" ] || USE_LIVECD_KERNEL="$OPT"
-OPT="$(opt_get "--use-admincd")";       [ -z "$OPT" ] || USE_ADMINCD="$OPT"
-OPT="$(opt_get "--color")";             [ -z "$OPT" ] || COLOR="$OPT"
+OPT="$(opt_get "--gentoo-mirror")";         [ -z "$OPT" ] || GENTOO_MIRROR="$OPT"
+OPT="$(opt_get "--gentoo-stage3")";         [ -z "$OPT" ] || GENTOO_STAGE3="$OPT"
+OPT="$(opt_get "--gentoo-profile")";        [ -z "$OPT" ] || GENTOO_PROFILE="$OPT"
+OPT="$(opt_get "--gentoo-livecd-iso")";     [ -z "$OPT" ] || GENTOO_LIVECD_ISO="$OPT"
+OPT="$(opt_get "--guest-name")";            [ -z "$OPT" ] || GUEST_NAME="$OPT"
+OPT="$(opt_get "--guest-disk-size")";       [ -z "$OPT" ] || GUEST_DISK_SIZE="$OPT"
+OPT="$(opt_get "--guest-mem-size")";        [ -z "$OPT" ] || GUEST_MEM_SIZE="$OPT"
+OPT="$(opt_get "--guest-cpus")";            [ -z "$OPT" ] || GUEST_CPUS="$OPT"
+OPT="$(opt_get "--host-ssh-port")";         [ -z "$OPT" ] || HOST_SSH_PORT="$OPT"
+OPT="$(opt_get "--ssh-public-key")";        [ -z "$OPT" ] || SSH_PUBLIC_KEY="$OPT"
+OPT="$(opt_get "--use-livecd-kernel")";     [ -z "$OPT" ] || USE_LIVECD_KERNEL="$OPT"
+OPT="$(opt_get "--use-admincd")";           [ -z "$OPT" ] || USE_ADMINCD="$OPT"
+OPT="$(opt_get "--color")";                 [ -z "$OPT" ] || COLOR="$OPT"
 
 # Autodetect Gentoo architecture based on profile name.
-GENTOO_ARCH="$(echo "$GENTOO_PROFILE" | grep -q '^\(amd64\|x32\)' && echo "amd64" || echo "x86")"
+GENTOO_ARCH="$(echo "$GENTOO_STAGE3" | grep -q '^\(amd64\|x32\)' && echo "amd64" || echo "x86")"
 
 # Autodetect guest name based on Gentoo architecture.
 GUEST_NAME="${GUEST_NAME:-Gentoo $GENTOO_ARCH}"
@@ -221,7 +273,10 @@ eindent
 
 einfo "Guest Name: $GUEST_NAME"
 einfo "Host SSH Port: $HOST_SSH_PORT"
-einfo "Gentoo Profile: $GENTOO_PROFILE ($GENTOO_ARCH)"
+einfo "Gentoo Stage3: $GENTOO_STAGE3 (ARCH: $GENTOO_ARCH)"
+if [ -n "$GENTOO_PROFILE" ]; then
+    einfo "Gentoo Profile: $GENTOO_PROFILE"
+fi
 
 eoutdent
 
@@ -253,13 +308,13 @@ cat "$SCRIPT_DIR/lib/elib.sh" \
         "ELOG_COLOR_QUOTE=\"$ELOG_COLOR_QUOTE\"" \
         "ELOG_COLOR_RESET=\"$ELOG_COLOR_RESET\"" \
         "GENTOO_MIRROR=\"$GENTOO_MIRROR\"" \
-        "GENTOO_PROFILE=\"$GENTOO_PROFILE\"" \
+        "GENTOO_STAGE3=\"$GENTOO_STAGE3\"" \
         "GENTOO_ARCH=\"$GENTOO_ARCH\"" \
         "TARGET_DISK=\"$TARGET_DISK\"" \
         "PARTITION_BOOT_SIZE=\"$PARTITION_BOOT_SIZE\"" \
         "PARTITION_SWAP_SIZE=\"$PARTITION_SWAP_SIZE\"" \
         "USE_LIVECD_KERNEL=\"$USE_LIVECD_KERNEL\"" \
-        "WGET_OPTS=\"$WGET_OPTS\"" \
+        "CURL_OPTS=\"$CURL_OPTS\"" \
         "GENTOO_GPG_KEYS=\"$GENTOO_GPG_KEYS\"" \
         "bash -s"
 
@@ -283,7 +338,16 @@ cat "$SCRIPT_DIR/lib/elib.sh" \
         "SSH_PUBLIC_KEY=\"$SSH_PUBLIC_KEY\"" \
         "EMERGE_OPTS=\"$EMERGE_OPTS\"" \
         "GENKERNEL_OPTS=\"$GENKERNEL_OPTS\"" \
+        "GENTOO_ARCH=\"$GENTOO_STAGE3\"" \
+        "GENTOO_STAGE3=\"$GENTOO_STAGE3\"" \
+        "GENTOO_PROFILE=\"$GENTOO_PROFILE\"" \
         "chroot /mnt/gentoo bash -s"
+
+einfo "Rebooting..."
+
+ssh $SSH_OPTS "root@localhost" -p "$HOST_SSH_PORT" "reboot"
+
+wait_until_ssh_will_be_up root localhost "$HOST_SSH_PORT"
 
 einfo "Shutting down..."
 
@@ -291,7 +355,7 @@ eexec VBoxManage controlvm "$GUEST_NAME" acpipowerbutton
 
 sleep 60
 
-einfo "Removing LiveCD from dvd..."
+einfo "Removing LiveCD from DVD drive..."
 
 eexec VBoxManage storageattach "$GUEST_NAME" \
     --storagectl SATA \

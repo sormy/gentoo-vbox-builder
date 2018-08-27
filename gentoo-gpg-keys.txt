@@ -1,5 +1,4 @@
-# Current Gentoo GPG public key IDs.
-# See more here: https://www.gentoo.org/downloads/signatures/
+# Current Gentoo GPG public key IDs: https://www.gentoo.org/downloads/signatures/
 
 # Gentoo Linux Release Engineering (Automated Weekly Release Key)
 # Used for: stage3 / livecd / admincd

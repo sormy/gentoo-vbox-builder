@@ -1,10 +1,10 @@
 #!/bin/bash
 
-# global WGET_OPTS
+# global CURL_OPTS
 # global GENTOO_GPG_KEYS
 
 download_distfile_safe() {
-    # global WGET_OPTS
+    # global CURL_OPTS
     # global GENTOO_GPG_KEYS
 
     local url="$1"
@@ -14,8 +14,9 @@ download_distfile_safe() {
     local actual_hash
     local hash
 
-    eexec wget $WGET_OPTS -O "$file" "$url"
-    eexec wget $WGET_OPTS -O "$file.DIGESTS.asc" "$url.DIGESTS.asc"
+    eexec curl $CURL_OPTS \
+        -o "$file" "$url" \
+        -o "$file.DIGESTS.asc" "$url.DIGESTS.asc"
 
     for hash in sha512 whirlpool; do
         einfo "Verifying $hash hash..."
@@ -45,7 +46,7 @@ download_distfile_safe() {
 }
 
 download_portage_safe() {
-    # global WGET_OPTS
+    # global CURL_OPTS
     # global GENTOO_GPG_KEYS
 
     local url="$1"
@@ -54,9 +55,10 @@ download_portage_safe() {
     local expected_hash
     local actual_hash
 
-    eexec wget $WGET_OPTS -O "$file" "$url"
-    eexec wget $WGET_OPTS -O "$file.md5sum" "$url.md5sum"
-    eexec wget $WGET_OPTS -O "$file.gpgsig" "$url.gpgsig"
+    eexec curl $CURL_OPTS \
+        -o "$file" "$url" \
+        -o "$file.md5sum" "$url.md5sum" \
+        -o "$file.gpgsig" "$url.gpgsig"
 
     einfo "Verifying md5 hash..."
 

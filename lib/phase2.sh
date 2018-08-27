@@ -1,13 +1,13 @@
 #!/bin/bash
 
 # input GENTOO_MIRROR
-# input GENTOO_PROFILE
+# input GENTOO_STAGE3
 # input GENTOO_ARCH
 # input TARGET_DISK
 # input PARTITION_BOOT_SIZE
 # input PARTITION_SWAP_SIZE
 # input USE_LIVECD_KERNEL
-# input WGET_OPTS
+# input CURL_OPTS
 
 set -e
 
@@ -69,7 +69,7 @@ einfo "Installing stage3..."
 
 eindent
 
-STAGE3_PATH_URL="$GENTOO_MIRROR/releases/$GENTOO_ARCH/autobuilds/latest-stage3-$GENTOO_PROFILE.txt"
+STAGE3_PATH_URL="$GENTOO_MIRROR/releases/$GENTOO_ARCH/autobuilds/latest-stage3-$GENTOO_STAGE3.txt"
 STAGE3_PATH="$(curl -s "$STAGE3_PATH_URL" | grep -v "^#" | cut -d" " -f1)"
 STAGE3_URL="$GENTOO_MIRROR/releases/$GENTOO_ARCH/autobuilds/$STAGE3_PATH"
 STAGE3_FILE="$(basename "$STAGE3_URL")"
