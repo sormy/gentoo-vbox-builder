@@ -289,7 +289,7 @@ einfo "PHASE 1: Prepare Instance..."
 eindent
 
 # all global variables are shared
-source "$SCRIPT_DIR/lib/phase1.sh"
+source "$SCRIPT_DIR/lib/phase1-prepare-instance.sh"
 
 eoutdent
 
@@ -299,7 +299,7 @@ eindent
 
 cat "$SCRIPT_DIR/lib/elib.sh" \
     "$SCRIPT_DIR/lib/distfiles.sh" \
-    "$SCRIPT_DIR/lib/phase2.sh" \
+    "$SCRIPT_DIR/lib/phase2-prepare-root.sh" \
     | ssh $SSH_OPTS "root@localhost" \
         -p "$HOST_SSH_PORT" \
         "ELOG_INDENT=\"$ELOG_INDENT\"" \
@@ -325,7 +325,7 @@ einfo "PHASE 3: Build Root..."
 eindent
 
 cat "$SCRIPT_DIR/lib/elib.sh" \
-    "$SCRIPT_DIR/lib/phase3.sh" \
+    "$SCRIPT_DIR/lib/phase3-build-root.sh" \
     | ssh $SSH_OPTS "root@localhost" \
         -p "$HOST_SSH_PORT" \
         "ELOG_INDENT=\"$ELOG_INDENT\"" \
