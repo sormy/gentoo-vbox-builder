@@ -118,8 +118,10 @@ GENTOO_PROFILE_LIST="$(
 
 cat << END
 $APP_NAME: $APP_DESCRIPTION v$APP_VERSION
+
 Usage:
     $(basename "$0") [options]
+
 Options:
     --gentoo-mirror <url>           (default is "$GENTOO_MIRROR")
         Set to use specific gentoo mirror instead of default one.
