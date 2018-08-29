@@ -13,14 +13,17 @@ set -e
 
 ################################################################################
 
+# detect if target is systemd
 GENTOO_SYSTEMD="$(
     (echo "$GENTOO_PROFILE" | grep -q 'systemd' \
         || echo "$GENTOO_STAGE3" | grep -q 'systemd') \
         && echo yes || echo no
 )"
 
+# detect kernel config file that should be used for bootstrap
 KERNEL_CONFIG="$(find /etc/kernels -type f | head -n 1)"
 
+# detect current Gentoo profile (from stage3)
 CURRENT_PROFILE="$(readlink /etc/portage/make.profile | sed 's!^.*/profiles/!!')"
 
 # https://www.gentoo.org/support/news-items/2017-12-26-experimental-amd64-17-1-profiles.html
@@ -38,6 +41,21 @@ einfo "Updating configuration..."
 
 eexec env-update
 eexec source /etc/profile
+
+################################################################################
+
+einfo "Tuning compiler options..."
+
+CPU_COUNT=$(cat /proc/cpuinfo | grep processor | wc -l)
+MAKE_THREADS=$(expr $CPU_COUNT + 1)
+MAKE_OPTS="-j$MAKE_THREADS"
+
+cat >> /etc/portage/make.conf << END
+
+# added by gentoo-vbox-builder
+CFLAGS="-O2 -pipe -mtune=generic"
+MAKEOPTS="$MAKE_OPTS"
+END
 
 ################################################################################
 
@@ -67,7 +85,7 @@ fi
 
 einfo "Rebuilding the world..."
 
-# rebuild whole world with new compiler options, useful for x32 profile, for example
+# rebuild whole world with new compiler options, could be probably useful for x32
 # eexec emerge $EMERGE_OPTS -e @world
 
 eexec emerge $EMERGE_OPTS --update --deep --newuse --with-bdeps=y @world
@@ -78,7 +96,7 @@ eexec emerge $EMERGE_OPTS --depclean
 if eon "$GENTOO_SYSTEMD"; then
     einfo "Tuning kernel configuration for systemd..."
 
-    eexec cp "$KERNEL_CONFIG" "$KERNEL_CONFIG.bootstrap"
+    eexec cp -f "$KERNEL_CONFIG" "$KERNEL_CONFIG.bootstrap"
 
     eexec sed -i \
         -e '/CONFIG_AUTOFS4_FS/c\CONFIG_AUTOFS4_FS=y' \
@@ -90,21 +108,6 @@ if eon "$GENTOO_SYSTEMD"; then
 
     KERNEL_CONFIG="$KERNEL_CONFIG.bootstrap"
 fi
-
-################################################################################
-
-einfo "Tuning compiler options..."
-
-CPU_COUNT=$(cat /proc/cpuinfo | grep processor | wc -l)
-MAKE_THREADS=$(expr $CPU_COUNT + 1)
-MAKE_OPTS="-j$MAKE_THREADS"
-
-cat >> /etc/portage/make.conf << END
-
-# added by gentoo vbox builder
-CFLAGS="-O2 -pipe -mtune=generic"
-MAKEOPTS="$MAKE_OPTS"
-END
 
 ################################################################################
 
@@ -138,7 +141,7 @@ einfo "Installing bootloader..."
 
 cat >> /etc/portage/make.conf << END
 
-# added by gentoo vbox builder
+# added by gentoo-vbox-builder
 GRUB_PLATFORMS="pc"
 END
 
@@ -153,7 +156,7 @@ fi
 
 cat >> /etc/default/grub << END
 
-# added by gentoo vbox builder
+# added by gentoo-vbox-builder
 GRUB_CMDLINE_LINUX="$GRUB_CMDLINE_LINUX"
 GRUB_DEFAULT=0
 GRUB_TIMEOUT=0
@@ -206,13 +209,17 @@ fi
 
 einfo "Configuring SSH..."
 
+eexec passwd -d -l root
+
 if eoff "$GENTOO_SYSTEMD"; then
     eexec rc-update add sshd default
 else
     eexec systemctl enable sshd.service
 fi
 
-eexec passwd -d -l root
+################################################################################
+
+einfo "Installing authorized SSH public key..."
 
 eexec mkdir /root/.ssh
 eexec touch /root/.ssh/authorized_keys

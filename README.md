@@ -66,36 +66,41 @@ something doesn't work as expected.
 Below are verified combinations that should work well.
 
 Tested on MacBook Pro Retina 13" (Early 2013), 3.0 GHz Core i7,
-2 hyper-threaded cpus (1 physical core) shared with guest.
+2 hyper-threaded cpus (1 physical core) shared with guest. Tests below have
 
 ```shell
 ./gentoo-vbox-builder.sh --gentoo-stage3 i686 --guest-name "Gentoo i686" --use-livecd-kernel yes
-# Process took: 15 minutes
+# Process took ~15 minutes
 ```
 
 ```shell
 ./gentoo-vbox-builder.sh --gentoo-stage3 i686 --guest-name "Gentoo i686"
-# Process took: 53 minutes
+# Process took ~50 minutes
 ```
 
 ```shell
 ./gentoo-vbox-builder.sh --gentoo-stage3 amd64 --guest-name "Gentoo amd64" --use-livecd-kernel yes
-# Process took: 16 minutes
+# Process took ~15 minutes
 ```
 
 ```shell
 ./gentoo-vbox-builder.sh --gentoo-stage3 amd64 --guest-name "Gentoo amd64"
-# Process took: 66 minutes
+# Process took ~60 minutes
+```
+
+```shell
+./gentoo-vbox-builder.sh --gentoo-stage3 amd64-systemd --guest-name "Gentoo amd64 systemd"
+# Process took ~60 minutes
 ```
 
 ```shell
 ./gentoo-vbox-builder.sh --gentoo-stage3 amd64 --gentoo-profile default/linux/amd64/17.0/systemd  --guest-name "Gentoo amd64 17.0 systemd"
-# Process took: 100 minutes
+# Process took ~100 minutes
 ```
 
 ```shell
 ./gentoo-vbox-builder.sh --gentoo-stage3 amd64 --gentoo-profile default/linux/amd64/17.1/systemd  --guest-name "Gentoo amd64 17.1 systemd"
-# Process took: 197 minutes
+# Process took 197 minutes
 ```
 
 ## Screenshots

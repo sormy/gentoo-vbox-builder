@@ -13,7 +13,7 @@ set -e
 
 ################################################################################
 
-einfo "Setting time..."
+einfo "Synchronizing time..."
 
 eexec ntpd -gq
 
@@ -153,7 +153,7 @@ einfo "Configuring fstab..."
 
 cat >> /mnt/gentoo/etc/fstab << END
 
-# added by gentoo vbox builder
+# added by gentoo-vbox-builder
 LABEL=boot /boot ext4 noauto,noatime 1 2
 LABEL=swap none  swap sw             0 0
 LABEL=root /     ext4 noatime        0 1

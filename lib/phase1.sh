@@ -24,28 +24,6 @@ set -e
 
 ################################################################################
 
-if [ -z "$GENTOO_LIVECD_ISO" ]; then
-    einfo "Downloading Gentoo LiveCD..."
-
-    eindent
-
-    LIVECD_FILTER="$(eon "$USE_ADMINCD" && echo admincd || echo minimal)"
-
-    GENTOO_LIVECD_META_URL="$GENTOO_MIRROR/releases/$GENTOO_ARCH/autobuilds/latest-iso.txt"
-    GENTOO_LIVECD_REL_PATH="$(curl -s "$GENTOO_LIVECD_META_URL" | grep -v "^#" | grep $LIVECD_FILTER | cut -d" " -f1)"
-    GENTOO_LIVECD_URL="$GENTOO_MIRROR/releases/$GENTOO_ARCH/autobuilds/$GENTOO_LIVECD_REL_PATH"
-    GENTOO_LIVECD_TMP="/tmp/$(basename "$GENTOO_LIVECD_REL_PATH")"
-    GENTOO_LIVECD_ISO="$GENTOO_LIVECD_TMP"
-
-    einfo "Downloading: $GENTOO_LIVECD_URL"
-
-    download_distfile_safe "$GENTOO_LIVECD_URL" "$GENTOO_LIVECD_TMP"
-
-    eoutdent
-fi
-
-################################################################################
-
 if VBoxManage list runningvms | grep -q '^"'"$GUEST_NAME"'"'; then
     einfo "Stopping existing guest..."
 
@@ -75,9 +53,32 @@ for VM in $RUNNING_VMS; do
         | sed -e 's/^.* = //' \
         | grep -q "^$HOST_SSH_PORT\$"
     then
-        edie "The host port is busy by one of running VMs."
+        VM_DESC="$(VBoxManage list vms | grep "$VM")"
+        edie "The host port $HOST_SSH_PORT is busy by running guest $VM_DESC"
     fi
 done
+
+################################################################################
+
+if [ -z "$GENTOO_LIVECD_ISO" ]; then
+    einfo "Downloading Gentoo LiveCD..."
+
+    eindent
+
+    LIVECD_FILTER="$(eon "$USE_ADMINCD" && echo admincd || echo minimal)"
+
+    GENTOO_LIVECD_META_URL="$GENTOO_MIRROR/releases/$GENTOO_ARCH/autobuilds/latest-iso.txt"
+    GENTOO_LIVECD_REL_PATH="$(curl -s "$GENTOO_LIVECD_META_URL" | grep -v "^#" | grep $LIVECD_FILTER | cut -d" " -f1)"
+    GENTOO_LIVECD_URL="$GENTOO_MIRROR/releases/$GENTOO_ARCH/autobuilds/$GENTOO_LIVECD_REL_PATH"
+    GENTOO_LIVECD_TMP="/tmp/$(basename "$GENTOO_LIVECD_REL_PATH")"
+    GENTOO_LIVECD_ISO="$GENTOO_LIVECD_TMP"
+
+    einfo "Downloading: $GENTOO_LIVECD_URL"
+
+    download_distfile_safe "$GENTOO_LIVECD_URL" "$GENTOO_LIVECD_TMP"
+
+    eoutdent
+fi
 
 ################################################################################
 
