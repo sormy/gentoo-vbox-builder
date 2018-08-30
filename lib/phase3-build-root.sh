@@ -147,19 +147,17 @@ END
 
 eexec emerge $EMERGE_OPTS "sys-boot/grub"
 
-if eoff "$GENTOO_SYSTEMD"; then
-    # makes network setup easier in OpenRC
-    GRUB_CMDLINE_LINUX="net.ifnames=0"
-else
-    GRUB_CMDLINE_LINUX="init=/lib/systemd/systemd"
+GRUB_CMDLINE_LINUX="net.ifnames=0"
+if eon "$GENTOO_SYSTEMD"; then
+    GRUB_CMDLINE_LINUX="$GRUB_CMDLINE_LINUX init=/lib/systemd/systemd"
 fi
 
 cat >> /etc/default/grub << END
 
 # added by gentoo-vbox-builder
-GRUB_CMDLINE_LINUX="$GRUB_CMDLINE_LINUX"
 GRUB_DEFAULT=0
 GRUB_TIMEOUT=0
+GRUB_CMDLINE_LINUX="$GRUB_CMDLINE_LINUX"
 END
 
 eexec grub-install "${TARGET_DISK}"

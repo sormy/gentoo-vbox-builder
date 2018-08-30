@@ -73,7 +73,7 @@ if [ -z "$GENTOO_LIVECD_ISO" ]; then
     GENTOO_LIVECD_TMP="/tmp/$(basename "$GENTOO_LIVECD_REL_PATH")"
     GENTOO_LIVECD_ISO="$GENTOO_LIVECD_TMP"
 
-    einfo "Downloading: $GENTOO_LIVECD_URL"
+    einfo "Downloading: $GENTOO_LIVECD_URL ..."
 
     download_distfile_safe "$GENTOO_LIVECD_URL" "$GENTOO_LIVECD_TMP"
 

@@ -74,7 +74,7 @@ STAGE3_PATH="$(curl -s "$STAGE3_PATH_URL" | grep -v "^#" | cut -d" " -f1)"
 STAGE3_URL="$GENTOO_MIRROR/releases/$GENTOO_ARCH/autobuilds/$STAGE3_PATH"
 STAGE3_FILE="$(basename "$STAGE3_URL")"
 
-einfo "Downloading: $STAGE3_URL"
+einfo "Downloading: $STAGE3_URL ..."
 
 download_distfile_safe "$STAGE3_URL" "$STAGE3_FILE"
 
@@ -103,7 +103,7 @@ eexec cp /mnt/gentoo/usr/share/portage/config/repos.conf \
 PORTAGE_URL="$GENTOO_MIRROR/releases/snapshots/current/portage-latest.tar.xz"
 PORTAGE_FILE="$(basename "$PORTAGE_URL")"
 
-einfo "Downloading: $PORTAGE_URL"
+einfo "Downloading: $PORTAGE_URL ..."
 
 download_portage_safe "$PORTAGE_URL" "$PORTAGE_FILE"
 
