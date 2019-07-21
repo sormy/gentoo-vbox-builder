@@ -132,10 +132,10 @@ if eon "$USE_LIVECD_KERNEL"; then
     LIVECD_KERNEL_VERSION=$(cat /proc/version | cut -d" " -f3)
     KERNEL_ARCH_SUFFIX=$(echo "$GENTOO_ARCH" | sed "s/^amd64$/x86_64/")
 
-    eexec cp -v "/mnt/cdrom/isolinux/gentoo" \
+    eexec cp -v "/mnt/cdrom/boot/gentoo" \
         "/mnt/gentoo/boot/kernel-genkernel-$KERNEL_ARCH_SUFFIX-$LIVECD_KERNEL_VERSION"
 
-    eexec cp -v "/mnt/cdrom/isolinux/gentoo.igz" \
+    eexec cp -v "/mnt/cdrom/boot/gentoo.igz" \
         "/mnt/gentoo/boot/initramfs-genkernel-$KERNEL_ARCH_SUFFIX-$LIVECD_KERNEL_VERSION"
 
     eexec cp -vR "/lib/modules/$LIVECD_KERNEL_VERSION" "/mnt/gentoo/lib/modules/"
