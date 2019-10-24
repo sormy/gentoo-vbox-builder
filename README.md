@@ -103,6 +103,15 @@ Tested on MacBook Pro Retina 13" (Early 2013), 3.0 GHz Core i7,
 # Process took 197 minutes
 ```
 
+## Troubleshooting
+
+If you are getting error "gpg: keyserver receive failed: No route to host", then
+try to use differet GPG server, for example:
+
+```
+GPG_SERVER="ipv4.pool.sks-keyservers.net" ./gentoo-vbox-builder
+```
+
 ## Screenshots
 
 ![Gentoo AMD64 / Use LiveCD Kernel](/screenshots/gentoo-amd64-use-livecd-kernel.png?raw=true)

@@ -17,12 +17,13 @@ source "$SCRIPT_DIR/lib/distfiles.sh"
 
 APP_NAME="gentoo-vbox-builder"
 APP_DESCRIPTION="Gentoo VirtualBox Image Builder"
-APP_VERSION="1.0.4"
+APP_VERSION="1.0.5"
 
 # Gentoo mirror.
 GENTOO_MIRROR="http://distfiles.gentoo.org"
 
 # Current Gentoo GPG public key IDs: https://www.gentoo.org/downloads/signatures/
+GPG_SERVER="pool.sks-keyservers.net"
 GENTOO_GPG_KEYS="$(cat "$SCRIPT_DIR/gentoo-gpg-keys.txt" | grep -v '^#')"
 
 # Gentoo stage3.
@@ -317,6 +318,7 @@ cat "$SCRIPT_DIR/lib/elib.sh" \
         "PARTITION_SWAP_SIZE=\"$PARTITION_SWAP_SIZE\"" \
         "USE_LIVECD_KERNEL=\"$USE_LIVECD_KERNEL\"" \
         "CURL_OPTS=\"$CURL_OPTS\"" \
+        "GPG_SERVER=\"$GPG_SERVER\"" \
         "GENTOO_GPG_KEYS=\"$GENTOO_GPG_KEYS\"" \
         "bash -s"
 

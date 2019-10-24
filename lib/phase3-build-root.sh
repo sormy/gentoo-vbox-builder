@@ -59,6 +59,14 @@ END
 
 ################################################################################
 
+einfo "Installing portage repo..."
+
+eexec mkdir -p /etc/portage/repos.conf
+eexec cp -f /usr/share/portage/config/repos.conf /etc/portage/repos.conf/gentoo.conf
+eexec emerge-webrsync
+
+################################################################################
+
 if [ -n "$GENTOO_PROFILE" ]; then
     if eon "$NO_SYMLINK_LIB_MIGRATION"; then
         einfo "Migrating current profile $CURRENT_PROFILE..."
@@ -93,6 +101,12 @@ eexec emerge $EMERGE_OPTS --depclean
 
 ################################################################################
 
+einfo "Installing kernel sources..."
+
+eexec emerge $EMERGE_OPTS "sys-kernel/gentoo-sources"
+
+################################################################################
+
 if eon "$GENTOO_SYSTEMD"; then
     einfo "Tuning kernel configuration for systemd..."
 
@@ -111,25 +125,29 @@ fi
 
 ################################################################################
 
-einfo "Installing kernel sources..."
-
-eexec emerge $EMERGE_OPTS "sys-kernel/gentoo-sources"
-
 if eon "$USE_LIVECD_KERNEL" && eon "$GENTOO_SYSTEMD"; then
     einfo "Detected systemd profile, LiveCD's kernel can't be used..."
+
     USE_LIVECD_KERNEL="off"
 fi
+
+################################################################################
 
 if eoff "$USE_LIVECD_KERNEL"; then
     einfo "Installing genkernel..."
 
     if eoff "$GENTOO_SYSTEMD"; then
-        echo "sys-apps/util-linux static-libs" > /etc/portage/package.use/genkernel
+        echo "sys-kernel/genkernel -firmware" > /etc/portage/package.use/genkernel
+        echo "sys-apps/util-linux static-libs" >> /etc/portage/package.use/genkernel
         eexec emerge $EMERGE_OPTS "sys-kernel/genkernel"
     else
         eexec emerge $EMERGE_OPTS "sys-kernel/genkernel-next"
     fi
+fi
 
+################################################################################
+
+if eoff "$USE_LIVECD_KERNEL"; then
     einfo "Installing kernel..."
 
     eexec genkernel $GENKERNEL_OPTS all --kernel-config="$KERNEL_CONFIG"

@@ -25,7 +25,7 @@ eindent
 
 einfo "Creating partitions..."
 
-eqexec sfdisk "${TARGET_DISK}" << END
+eqexec sfdisk --label dos "${TARGET_DISK}" << END
 size=$PARTITION_BOOT_SIZE,bootable
 size=$PARTITION_SWAP_SIZE
 ;
@@ -85,35 +85,6 @@ eexec tar xpf "$STAGE3_FILE" --xattrs-include='*.*' --numeric-owner
 einfo "Cleaning up..."
 
 eexec rm stage3-*
-
-eoutdent
-
-################################################################################
-
-einfo "Installing portage repo..."
-
-eindent
-
-einfo "Initializing..."
-
-eexec mkdir -p /mnt/gentoo/etc/portage/repos.conf
-eexec cp /mnt/gentoo/usr/share/portage/config/repos.conf \
-    /mnt/gentoo/etc/portage/repos.conf/gentoo.conf
-
-PORTAGE_URL="$GENTOO_MIRROR/releases/snapshots/current/portage-latest.tar.xz"
-PORTAGE_FILE="$(basename "$PORTAGE_URL")"
-
-einfo "Downloading: $PORTAGE_URL ..."
-
-download_portage_safe "$PORTAGE_URL" "$PORTAGE_FILE"
-
-einfo "Extracting..."
-
-eexec tar xf "$PORTAGE_FILE" -C usr --xattrs-include='*.*' --numeric-owner
-
-einfo "Cleaning up..."
-
-eexec rm portage-latest.*
 
 eoutdent
 

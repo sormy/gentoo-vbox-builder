@@ -14,6 +14,7 @@
 # input GENTOO_ARCH
 # input GENTOO_LIVECD_ISO
 # input CURL_OPTS
+# input GPG_SERVER
 # input GENTOO_GPG_KEYS
 # input USE_ADMINCD
 
@@ -168,16 +169,20 @@ einfo "Configuring SSH..."
 
 GUEST_INIT_FILE="$(mktemp)"
 
+# extra comment lines are needed to workaround VirtualBox v6.x issues
 cat > "$GUEST_INIT_FILE" << EOF
+################################################################################
+################################################################################
+################################################################################
+################################################################################
+################################################################################
 mkdir -p /root/.ssh
 echo "$SSH_PUBLIC_KEY" > /root/.ssh/authorized_keys
 /etc/init.d/sshd start
 EOF
 
-GUEST_INIT_SCRIPT="$(cat "$GUEST_INIT_FILE")"
-
 eexec VBoxManage controlvm "$GUEST_NAME" \
-    keyboardputstring "$GUEST_INIT_SCRIPT"$'\n'
+    keyboardputfile "$GUEST_INIT_FILE"
 
 wait_until_ssh_will_be_up root localhost "$HOST_SSH_PORT"
 
