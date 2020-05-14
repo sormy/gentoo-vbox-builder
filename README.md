@@ -12,12 +12,12 @@ Unattended quick installation script for Gentoo on local VirtualBox.
 
 ## Usage
 
-Run `gentoo-vbox-builder --help` for help.
+Run `./gentoo-vbox-builder.sh --help` for help.
 
 Usually you just need to run script and wait until it will finish the job:
 
 ```shell
-./gentoo-vbox-builder
+./gentoo-vbox-builder.sh
 ```
 
 Some options could be helpful to solve different problems and speedup the process:
@@ -28,7 +28,7 @@ Some options could be helpful to solve different problems and speedup the proces
 - `--gentoo-stage3` - Choose specific stage3 to use for bootstrap.
 - `--gentoo-profile` - Choose specific profile (slow build time if used).
 
-There are more options available, run `./gentoo-vbox-builder --help` to learn more.
+There are more options available, run `./gentoo-vbox-builder.sh --help` to learn more.
 
 If specific stage3 is broken, for example, `stage3-amd64-systemd` then you still
 could build using profile switch from base profile and rebuild the world, but it
@@ -109,7 +109,7 @@ If you are getting error "gpg: keyserver receive failed: No route to host", then
 try to use differet GPG server, for example:
 
 ```
-GPG_SERVER="ipv4.pool.sks-keyservers.net" ./gentoo-vbox-builder
+GPG_SERVER="ipv4.pool.sks-keyservers.net" ./gentoo-vbox-builder.sh
 ```
 
 ## Screenshots

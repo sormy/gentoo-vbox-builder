@@ -23,7 +23,7 @@ APP_VERSION="1.0.5"
 GENTOO_MIRROR="http://distfiles.gentoo.org"
 
 # Current Gentoo GPG public key IDs: https://www.gentoo.org/downloads/signatures/
-GPG_SERVER="pool.sks-keyservers.net"
+GPG_SERVER="${GPG_SERVER:-pool.sks-keyservers.net}"
 GENTOO_GPG_KEYS="$(cat "$SCRIPT_DIR/gentoo-gpg-keys.txt" | grep -v '^#')"
 
 # Gentoo stage3.
