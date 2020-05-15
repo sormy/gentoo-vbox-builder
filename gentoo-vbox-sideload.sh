@@ -73,12 +73,6 @@ wget $STAGE3_URL
 
 tar xvpf $(basename $STAGE3_URL)
 
-echo "### Installing portage..."
-
-mkdir -p /etc/portage/repos.conf
-cp -f /usr/share/portage/config/repos.conf /etc/portage/repos.conf/gentoo.conf
-emerge-webrsync
-
 if [ "$USE_LIVECD_KERNEL" != 0 ]; then
     echo "### Installing LiveCD kernel..."
 
@@ -128,6 +122,12 @@ set -e
 echo "### Upading configuration..."
 
 env-update && source /etc/profile
+
+echo "### Installing portage..."
+
+mkdir -p /etc/portage/repos.conf
+cp -f /usr/share/portage/config/repos.conf /etc/portage/repos.conf/gentoo.conf
+emerge-webrsync
 
 echo "### Installing kernel sources..."
 
