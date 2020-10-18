@@ -156,7 +156,8 @@ emerge sys-kernel/gentoo-sources
 if [ "$USE_LIVECD_KERNEL" = 0 ]; then
     echo "### Installing kernel..."
 
-    echo "sys-apps/util-linux static-libs" > /etc/portage/package.use/genkernel
+    echo "sys-kernel/genkernel -firmware" > /etc/portage/package.use/genkernel
+    echo "sys-apps/util-linux static-libs" >> /etc/portage/package.use/genkernel
 
     emerge sys-kernel/genkernel
 
