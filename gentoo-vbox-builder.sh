@@ -17,13 +17,13 @@ source "$SCRIPT_DIR/lib/distfiles.sh"
 
 APP_NAME="gentoo-vbox-builder"
 APP_DESCRIPTION="Gentoo VirtualBox Image Builder"
-APP_VERSION="1.0.6"
+APP_VERSION="1.0.7"
 
 # Gentoo mirror.
 GENTOO_MIRROR="http://distfiles.gentoo.org"
 
 # Current Gentoo GPG public key IDs: https://www.gentoo.org/downloads/signatures/
-GPG_SERVER="${GPG_SERVER:-pool.sks-keyservers.net}"
+GENTOO_GPG_SERVER="${GENTOO_GPG_SERVER:-hkps://keys.gentoo.org}"
 GENTOO_GPG_KEYS="$(cat "$SCRIPT_DIR/gentoo-gpg-keys.txt" | grep -v '^#')"
 
 # Gentoo stage3.
@@ -80,6 +80,9 @@ PARTITION_SWAP_SIZE="1G"
 # SSH public key to use.
 SSH_PUBLIC_KEY="$(cat "$HOME/.ssh/id_rsa.pub")"
 
+# Set root password.
+ROOT_PASSWORD="Gentoo123"
+
 # Curl default options.
 CURL_OPTS="--silent"
 
@@ -95,7 +98,9 @@ SSH_OPTS="-o ConnectTimeout=5
           -o ChallengeResponseAuthentication=no
           -o UserKnownHostsFile=/dev/null
           -o StrictHostKeyChecking=no
-          -o LogLevel=error"
+          -o LogLevel=error
+          -o ServerAliveInterval=60
+          -o ServerAliveCountMax=3"
 
 # Enable color by default.
 COLOR="on"
@@ -107,14 +112,13 @@ show_help() {
 GENTOO_STAGE3_LIST="$(
     curl -s http://distfiles.gentoo.org/releases/{x86,amd64}/autobuilds/ \
         | grep -e '"latest-stage3-\S*\.txt"' -o \
-        | sed -e 's/"//g' -e 's/^latest-stage3-//' -e 's/\.txt$//'
+        | sed -e 's/"//g' -e 's/^latest-stage3-//' -e 's/\.txt$//' \
+        | sort | uniq \
 )"
 
 GENTOO_PROFILE_LIST="$(
     curl -s https://raw.githubusercontent.com/gentoo/gentoo/master/profiles/profiles.desc \
-        | sed 's/ \{1,\}/ /g' \
-        | grep -e '^\(amd64\|x86\) ' \
-        | cut -d ' ' -f 2
+        | grep '^\(x86\|amd64\)\s' | cut -f 3 | sort | uniq \
 )"
 
 cat << END
@@ -156,6 +160,9 @@ $(echo "$GENTOO_PROFILE_LIST" | sed 's/^/          * /')
     --ssh-public-key <key>          (default is from ~/.ssh/id_rsa.pub)
         Set to use specific public ssh key for bootstrap.
 
+    --root-password <password>      (default is "$ROOT_PASSWORD")
+        Enable password auth.
+
     --use-livecd-kernel <bool>      (default is "$USE_LIVECD_KERNEL")
         Use precompiled livecd kernel from livecd. This options will save
         time on getting bootable system.
@@ -194,6 +201,7 @@ opt_config "
     --guest-cpus \
     --host-ssh-port \
     --ssh-public-key \
+    --root-password \
     --use-livecd-kernel \
     --use-admincd \
     --color \
@@ -221,6 +229,7 @@ OPT="$(opt_get "--guest-mem-size")";        [ -z "$OPT" ] || GUEST_MEM_SIZE="$OP
 OPT="$(opt_get "--guest-cpus")";            [ -z "$OPT" ] || GUEST_CPUS="$OPT"
 OPT="$(opt_get "--host-ssh-port")";         [ -z "$OPT" ] || HOST_SSH_PORT="$OPT"
 OPT="$(opt_get "--ssh-public-key")";        [ -z "$OPT" ] || SSH_PUBLIC_KEY="$OPT"
+OPT="$(opt_get "--root-password")";         [ -z "$OPT" ] || ROOT_PASSWORD="$OPT"
 OPT="$(opt_get "--use-livecd-kernel")";     [ -z "$OPT" ] || USE_LIVECD_KERNEL="$OPT"
 OPT="$(opt_get "--use-admincd")";           [ -z "$OPT" ] || USE_ADMINCD="$OPT"
 OPT="$(opt_get "--color")";                 [ -z "$OPT" ] || COLOR="$OPT"
@@ -318,7 +327,7 @@ cat "$SCRIPT_DIR/lib/elib.sh" \
         "PARTITION_SWAP_SIZE=\"$PARTITION_SWAP_SIZE\"" \
         "USE_LIVECD_KERNEL=\"$USE_LIVECD_KERNEL\"" \
         "CURL_OPTS=\"$CURL_OPTS\"" \
-        "GPG_SERVER=\"$GPG_SERVER\"" \
+        "GENTOO_GPG_SERVER=\"$GENTOO_GPG_SERVER\"" \
         "GENTOO_GPG_KEYS=\"$GENTOO_GPG_KEYS\"" \
         "bash -s"
 
@@ -340,6 +349,7 @@ cat "$SCRIPT_DIR/lib/elib.sh" \
         "USE_LIVECD_KERNEL=\"$USE_LIVECD_KERNEL\"" \
         "TARGET_DISK=\"$TARGET_DISK\"" \
         "SSH_PUBLIC_KEY=\"$SSH_PUBLIC_KEY\"" \
+        "ROOT_PASSWORD=\"$ROOT_PASSWORD\"" \
         "EMERGE_OPTS=\"$EMERGE_OPTS\"" \
         "GENKERNEL_OPTS=\"$GENKERNEL_OPTS\"" \
         "GENTOO_ARCH=\"$GENTOO_STAGE3\"" \

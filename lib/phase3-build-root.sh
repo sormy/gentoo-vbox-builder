@@ -3,6 +3,7 @@
 # input USE_LIVECD_KERNEL
 # input TARGET_DISK
 # input SSH_PUBLIC_KEY
+# input ROOT_PASSWORD
 # input EMERGE_OPTS
 # input GENKERNEL_OPTS
 # input GENTOO_ARCH
@@ -54,6 +55,7 @@ cat >> /etc/portage/make.conf << END
 
 # added by gentoo-vbox-builder
 CFLAGS="-O2 -pipe -mtune=generic"
+CXXFLAGS="\$CFLAGS"
 MAKEOPTS="$MAKE_OPTS"
 END
 
@@ -136,13 +138,9 @@ fi
 if eoff "$USE_LIVECD_KERNEL"; then
     einfo "Installing genkernel..."
 
-    if eoff "$GENTOO_SYSTEMD"; then
-        echo "sys-kernel/genkernel -firmware" > /etc/portage/package.use/genkernel
-        echo "sys-apps/util-linux static-libs" >> /etc/portage/package.use/genkernel
-        eexec emerge $EMERGE_OPTS "sys-kernel/genkernel"
-    else
-        eexec emerge $EMERGE_OPTS "sys-kernel/genkernel-next"
-    fi
+    echo "sys-kernel/genkernel -firmware" > /etc/portage/package.use/genkernel
+    echo "sys-apps/util-linux static-libs" >> /etc/portage/package.use/genkernel
+    eexec emerge $EMERGE_OPTS "sys-kernel/genkernel"
 fi
 
 ################################################################################
@@ -150,7 +148,8 @@ fi
 if eoff "$USE_LIVECD_KERNEL"; then
     einfo "Installing kernel..."
 
-    eexec genkernel $GENKERNEL_OPTS all --kernel-config="$KERNEL_CONFIG"
+    eexec genkernel all $GENKERNEL_OPTS --makeopts="$MAKE_OPTS" \
+        --kernel-config="$KERNEL_CONFIG"
 fi
 
 ################################################################################
@@ -215,22 +214,30 @@ Name=*
 [Network]
 DHCP=yes
 END
-    eexec systemctl enable systemd-networkd.service
+    eexec systemctl enable systemd-networkd
 
     eexec ln -snf /run/systemd/resolve/resolv.conf /etc/resolv.conf
-    eexec systemctl enable systemd-resolved.service
+    eexec systemctl enable systemd-resolved
+fi
+
+################################################################################
+
+if [ -z "$ROOT_PASSWORD" ]; then
+    einfo "Removing root password..."
+    eexec passwd -d -l root
+else
+    einfo "Configuring root password..."
+    echo "root:$ROOT_PASSWORD" | eexec chpasswd
 fi
 
 ################################################################################
 
 einfo "Configuring SSH..."
 
-eexec passwd -d -l root
-
 if eoff "$GENTOO_SYSTEMD"; then
     eexec rc-update add sshd default
 else
-    eexec systemctl enable sshd.service
+    eexec systemctl enable sshd
 fi
 
 ################################################################################

@@ -100,15 +100,10 @@ eexec cp -v /etc/kernels/* /mnt/gentoo/etc/kernels
 if eon "$USE_LIVECD_KERNEL"; then
     einfo "Installing LiveCD's kernel/initramfs/modules..."
 
-    LIVECD_KERNEL_VERSION=$(cat /proc/version | cut -d" " -f3)
-    KERNEL_ARCH_SUFFIX=$(echo "$GENTOO_ARCH" | sed "s/^amd64$/x86_64/")
+    LIVECD_KERNEL_VERSION=$(cut -d " " -f 3 < /proc/version)
 
-    eexec cp -v "/mnt/cdrom/boot/gentoo" \
-        "/mnt/gentoo/boot/kernel-genkernel-$KERNEL_ARCH_SUFFIX-$LIVECD_KERNEL_VERSION"
-
-    eexec cp -v "/mnt/cdrom/boot/gentoo.igz" \
-        "/mnt/gentoo/boot/initramfs-genkernel-$KERNEL_ARCH_SUFFIX-$LIVECD_KERNEL_VERSION"
-
+    eexec cp -v "/mnt/cdrom/boot/gentoo" "/mnt/gentoo/boot/vmlinuz-$LIVECD_KERNEL_VERSION"
+    eexec cp -v "/mnt/cdrom/boot/gentoo.igz" "/mnt/gentoo/boot/initramfs-$LIVECD_KERNEL_VERSION.img"
     eexec cp -vR "/lib/modules/$LIVECD_KERNEL_VERSION" "/mnt/gentoo/lib/modules/"
 fi
 
@@ -132,11 +127,12 @@ END
 
 ################################################################################
 
-einfo "Mounting proc/sys/dev/pts..."
+einfo "Mounting proc/sys/dev..."
 
 eexec mount -t proc none /mnt/gentoo/proc
 eexec mount -t sysfs none /mnt/gentoo/sys
 eexec mount -o bind /dev /mnt/gentoo/dev
 eexec mount -o bind /dev/pts /mnt/gentoo/dev/pts
+eexec mount -o bind /dev/shm /mnt/gentoo/dev/shm
 
 ################################################################################

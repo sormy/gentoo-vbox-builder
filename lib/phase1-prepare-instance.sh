@@ -14,7 +14,7 @@
 # input GENTOO_ARCH
 # input GENTOO_LIVECD_ISO
 # input CURL_OPTS
-# input GPG_SERVER
+# input GENTOO_GPG_SERVER
 # input GENTOO_GPG_KEYS
 # input USE_ADMINCD
 
