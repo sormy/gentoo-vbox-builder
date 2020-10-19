@@ -126,8 +126,8 @@ GENTOO_GPG_SERVER="ipv4.pool.sks-keyservers.net" ./gentoo-vbox-builder.sh ...
 
 Gentoo is rolling release system so the builder that worked Yesterday could stop
 working Today. This application requires periodical maintenance to ensure that
-it is still working on latest Gentoo and new AWS instance type. Please file a
-bug if you are experiencing an issue and we will take care of it.
+it is still working on latest Gentoo and latest VirtualBox. Please file a bug if
+you are experiencing an issue and we will take care of it.
 
 Please use the GitHub [issue tracker](https://github.com/sormy/gentoo-vbox-builder/issues)
 for any bugs or feature suggestions.
