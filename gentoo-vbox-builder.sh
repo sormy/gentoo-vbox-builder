@@ -379,6 +379,8 @@ eexec VBoxManage storageattach "$GUEST_NAME" \
 
 eoutdent
 
+einfo "Pruning any old instance's known ssh fingerprints"
+ssh-keygen -R [localhost]:$HOST_SSH_PORT
 
 
 einfo "Done at $(date)"

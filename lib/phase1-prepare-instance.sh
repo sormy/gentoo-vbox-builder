@@ -59,8 +59,7 @@ for VM in $RUNNING_VMS; do
     fi
 done
 
-einfo "Pruning any old instance's known ssh fingerprints"
-ssh-keygen -R [localhost]:$HOST_SSH_PORT
+
 
 ################################################################################
 
