@@ -81,7 +81,7 @@ PARTITION_SWAP_SIZE="1G"
 SSH_PUBLIC_KEY="$(cat "$HOME/.ssh/id_rsa.pub")"
 
 # Set root password.
-ROOT_PASSWORD="Gentoo123"
+ROOT_PASSWORD="Gentoo.Built.123"
 
 # Curl default options.
 CURL_OPTS="--silent"
