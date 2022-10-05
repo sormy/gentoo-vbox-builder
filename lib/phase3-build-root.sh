@@ -125,6 +125,9 @@ if eon "$GENTOO_SYSTEMD"; then
     KERNEL_CONFIG="$KERNEL_CONFIG.bootstrap"
 fi
 
+# Genkernel will fail if we do not have a /usr/src/linux symlink
+eexec eselect kernel set 1
+
 ################################################################################
 
 if eon "$USE_LIVECD_KERNEL" && eon "$GENTOO_SYSTEMD"; then
@@ -202,6 +205,9 @@ fi
 ################################################################################
 
 einfo "Configuring network..."
+
+# Network needs DHCP to come up
+eexec emerge $EMERGE_OPTS "net-misc/dhcpcd"
 
 if eoff "$GENTOO_SYSTEMD"; then
     eexec ln -s /etc/init.d/net.lo /etc/init.d/net.eth0
