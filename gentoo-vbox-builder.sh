@@ -17,7 +17,7 @@ source "$SCRIPT_DIR/lib/distfiles.sh"
 
 APP_NAME="gentoo-vbox-builder"
 APP_DESCRIPTION="Gentoo VirtualBox Image Builder"
-APP_VERSION="1.0.7"
+APP_VERSION="1.0.8"
 
 # Gentoo mirror.
 GENTOO_MIRROR="http://distfiles.gentoo.org"
@@ -45,13 +45,13 @@ GUEST_NAME=""
 GUEST_OS_TYPE=""
 
 # Configure virtual disk size for Gentoo.
-GUEST_DISK_SIZE="20480"
+GUEST_DISK_SIZE="10240"
 
 # Configure number of CPUs delegated to guest.
-GUEST_CPUS="2"
+GUEST_CPUS="4"
 
 # Configure memory size delegated to guest.
-GUEST_MEM_SIZE="1024"
+GUEST_MEM_SIZE="4096"
 
 # Guest hard disk filename.
 GUEST_DISK_FILENAME=""
@@ -72,10 +72,10 @@ USE_ADMINCD="off"
 TARGET_DISK="/dev/sda"
 
 # Boot partition size.
-PARTITION_BOOT_SIZE="100M"
+PARTITION_BOOT_SIZE="300M"
 
 # Swap partition size.
-PARTITION_SWAP_SIZE="1G"
+PARTITION_SWAP_SIZE="128M"
 
 # SSH public key to use.
 SSH_PUBLIC_KEY="$(cat "$HOME/.ssh/id_rsa.pub")"
@@ -378,6 +378,8 @@ eexec VBoxManage storageattach "$GUEST_NAME" \
     --port 0
 
 eoutdent
+
+
 
 einfo "Done at $(date)"
 
