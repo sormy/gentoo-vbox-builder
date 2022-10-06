@@ -307,6 +307,14 @@ eoutdent
 
 einfo "PHASE 2: Prepare Root..."
 
+# detect if target is systemd
+GENTOO_SYSTEMD="$(
+    (echo "$GENTOO_PROFILE" | grep -q 'systemd' \
+        || echo "$GENTOO_STAGE3" | grep -q 'systemd') \
+        && echo yes || echo no
+)"
+
+
 eindent
 
 cat "$SCRIPT_DIR/lib/elib.sh" \
@@ -329,6 +337,8 @@ cat "$SCRIPT_DIR/lib/elib.sh" \
         "CURL_OPTS=\"$CURL_OPTS\"" \
         "GENTOO_GPG_SERVER=\"$GENTOO_GPG_SERVER\"" \
         "GENTOO_GPG_KEYS=\"$GENTOO_GPG_KEYS\"" \
+        "GENTOO_PROFILE=\"$GENTOO_PROFILE\"" \
+        "GENTOO_SYSTEMD=\"$GENTOO_SYSTEMD\"" \
         "bash -s"
 
 eoutdent
@@ -355,6 +365,7 @@ cat "$SCRIPT_DIR/lib/elib.sh" \
         "GENTOO_ARCH=\"$GENTOO_STAGE3\"" \
         "GENTOO_STAGE3=\"$GENTOO_STAGE3\"" \
         "GENTOO_PROFILE=\"$GENTOO_PROFILE\"" \
+        "GENTOO_SYSTEMD=\"$GENTOO_SYSTEMD\"" \
         "chroot /mnt/gentoo bash -s"
 
 einfo "Rebooting..."
