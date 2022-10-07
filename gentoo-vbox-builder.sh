@@ -17,7 +17,7 @@ source "$SCRIPT_DIR/lib/distfiles.sh"
 
 APP_NAME="gentoo-vbox-builder"
 APP_DESCRIPTION="Gentoo VirtualBox Image Builder"
-APP_VERSION="1.0.7"
+APP_VERSION="1.0.8"
 
 # Gentoo mirror.
 GENTOO_MIRROR="http://distfiles.gentoo.org"
@@ -51,7 +51,7 @@ GUEST_DISK_SIZE="20480"
 GUEST_CPUS="2"
 
 # Configure memory size delegated to guest.
-GUEST_MEM_SIZE="1024"
+GUEST_MEM_SIZE="4096"
 
 # Guest hard disk filename.
 GUEST_DISK_FILENAME=""
@@ -72,16 +72,16 @@ USE_ADMINCD="off"
 TARGET_DISK="/dev/sda"
 
 # Boot partition size.
-PARTITION_BOOT_SIZE="100M"
+PARTITION_BOOT_SIZE="300M"
 
 # Swap partition size.
-PARTITION_SWAP_SIZE="1G"
+PARTITION_SWAP_SIZE="128M"
 
 # SSH public key to use.
 SSH_PUBLIC_KEY="$(cat "$HOME/.ssh/id_rsa.pub")"
 
 # Set root password.
-ROOT_PASSWORD="Gentoo123"
+ROOT_PASSWORD="Gentoo.Built.123"
 
 # Curl default options.
 CURL_OPTS="--silent"
@@ -246,6 +246,13 @@ GUEST_OS_TYPE="$([ "$GENTOO_ARCH" = "x86" ] && echo "Gentoo" || echo "Gentoo_64"
 # Use default VirtualBox naming convention for virtual disk files.
 GUEST_DISK_FILENAME="$HOME/VirtualBox VMs/$GUEST_NAME/$GUEST_NAME.vdi"
 
+# Detect if target profile is systemd
+GENTOO_SYSTEMD="$(
+    (echo "$GENTOO_PROFILE" | grep -q 'systemd' \
+        || echo "$GENTOO_STAGE3" | grep -q 'systemd') \
+        && echo yes || echo no
+)"
+
 elog_set_colors "$COLOR"
 
 ################################################################################
@@ -305,6 +312,8 @@ source "$SCRIPT_DIR/lib/phase1-prepare-instance.sh"
 
 eoutdent
 
+################################################################################
+
 einfo "PHASE 2: Prepare Root..."
 
 eindent
@@ -329,9 +338,13 @@ cat "$SCRIPT_DIR/lib/elib.sh" \
         "CURL_OPTS=\"$CURL_OPTS\"" \
         "GENTOO_GPG_SERVER=\"$GENTOO_GPG_SERVER\"" \
         "GENTOO_GPG_KEYS=\"$GENTOO_GPG_KEYS\"" \
+        "GENTOO_PROFILE=\"$GENTOO_PROFILE\"" \
+        "GENTOO_SYSTEMD=\"$GENTOO_SYSTEMD\"" \
         "bash -s"
 
 eoutdent
+
+################################################################################
 
 einfo "PHASE 3: Build Root..."
 
@@ -355,7 +368,10 @@ cat "$SCRIPT_DIR/lib/elib.sh" \
         "GENTOO_ARCH=\"$GENTOO_STAGE3\"" \
         "GENTOO_STAGE3=\"$GENTOO_STAGE3\"" \
         "GENTOO_PROFILE=\"$GENTOO_PROFILE\"" \
+        "GENTOO_SYSTEMD=\"$GENTOO_SYSTEMD\"" \
         "chroot /mnt/gentoo bash -s"
+
+################################################################################
 
 einfo "Rebooting..."
 
@@ -378,6 +394,10 @@ eexec VBoxManage storageattach "$GUEST_NAME" \
     --port 0
 
 eoutdent
+
+einfo "Pruning any old instance's known ssh fingerprints"
+ssh-keygen -R [localhost]:$HOST_SSH_PORT
+
 
 einfo "Done at $(date)"
 

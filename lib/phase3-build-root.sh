@@ -14,13 +14,6 @@ set -e
 
 ################################################################################
 
-# detect if target is systemd
-GENTOO_SYSTEMD="$(
-    (echo "$GENTOO_PROFILE" | grep -q 'systemd' \
-        || echo "$GENTOO_STAGE3" | grep -q 'systemd') \
-        && echo yes || echo no
-)"
-
 # detect kernel config file that should be used for bootstrap
 KERNEL_CONFIG="$(find /etc/kernels -type f | head -n 1)"
 
@@ -125,6 +118,9 @@ if eon "$GENTOO_SYSTEMD"; then
     KERNEL_CONFIG="$KERNEL_CONFIG.bootstrap"
 fi
 
+# Genkernel will fail if we do not have a /usr/src/linux symlink
+eexec eselect kernel set 1
+
 ################################################################################
 
 if eon "$USE_LIVECD_KERNEL" && eon "$GENTOO_SYSTEMD"; then
@@ -202,6 +198,9 @@ fi
 ################################################################################
 
 einfo "Configuring network..."
+
+# Network needs DHCP to come up
+eexec emerge $EMERGE_OPTS "net-misc/dhcpcd"
 
 if eoff "$GENTOO_SYSTEMD"; then
     eexec ln -s /etc/init.d/net.lo /etc/init.d/net.eth0

@@ -59,6 +59,8 @@ for VM in $RUNNING_VMS; do
     fi
 done
 
+
+
 ################################################################################
 
 if [ -z "$GENTOO_LIVECD_ISO" ]; then
