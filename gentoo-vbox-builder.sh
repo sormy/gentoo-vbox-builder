@@ -45,10 +45,10 @@ GUEST_NAME=""
 GUEST_OS_TYPE=""
 
 # Configure virtual disk size for Gentoo.
-GUEST_DISK_SIZE="10240"
+GUEST_DISK_SIZE="20480"
 
 # Configure number of CPUs delegated to guest.
-GUEST_CPUS="4"
+GUEST_CPUS="2"
 
 # Configure memory size delegated to guest.
 GUEST_MEM_SIZE="4096"
