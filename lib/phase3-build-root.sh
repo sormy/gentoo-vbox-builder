@@ -14,13 +14,6 @@ set -e
 
 ################################################################################
 
-# detect if target is systemd
-GENTOO_SYSTEMD="$(
-    (echo "$GENTOO_PROFILE" | grep -q 'systemd' \
-        || echo "$GENTOO_STAGE3" | grep -q 'systemd') \
-        && echo yes || echo no
-)"
-
 # detect kernel config file that should be used for bootstrap
 KERNEL_CONFIG="$(find /etc/kernels -type f | head -n 1)"
 
