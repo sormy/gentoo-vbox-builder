@@ -246,6 +246,13 @@ GUEST_OS_TYPE="$([ "$GENTOO_ARCH" = "x86" ] && echo "Gentoo" || echo "Gentoo_64"
 # Use default VirtualBox naming convention for virtual disk files.
 GUEST_DISK_FILENAME="$HOME/VirtualBox VMs/$GUEST_NAME/$GUEST_NAME.vdi"
 
+# Detect if target profile is systemd
+GENTOO_SYSTEMD="$(
+    (echo "$GENTOO_PROFILE" | grep -q 'systemd' \
+        || echo "$GENTOO_STAGE3" | grep -q 'systemd') \
+        && echo yes || echo no
+)"
+
 elog_set_colors "$COLOR"
 
 ################################################################################
@@ -305,15 +312,9 @@ source "$SCRIPT_DIR/lib/phase1-prepare-instance.sh"
 
 eoutdent
 
+################################################################################
+
 einfo "PHASE 2: Prepare Root..."
-
-# detect if target is systemd
-GENTOO_SYSTEMD="$(
-    (echo "$GENTOO_PROFILE" | grep -q 'systemd' \
-        || echo "$GENTOO_STAGE3" | grep -q 'systemd') \
-        && echo yes || echo no
-)"
-
 
 eindent
 
@@ -343,6 +344,8 @@ cat "$SCRIPT_DIR/lib/elib.sh" \
 
 eoutdent
 
+################################################################################
+
 einfo "PHASE 3: Build Root..."
 
 eindent
@@ -367,6 +370,8 @@ cat "$SCRIPT_DIR/lib/elib.sh" \
         "GENTOO_PROFILE=\"$GENTOO_PROFILE\"" \
         "GENTOO_SYSTEMD=\"$GENTOO_SYSTEMD\"" \
         "chroot /mnt/gentoo bash -s"
+
+################################################################################
 
 einfo "Rebooting..."
 
