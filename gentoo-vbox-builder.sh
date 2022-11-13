@@ -105,6 +105,9 @@ SSH_OPTS="-o ConnectTimeout=5
 # Enable color by default.
 COLOR="on"
 
+# Disable Keeping of Downloads by default
+KEEP_DOWNLOADS="off"
+
 # Disable Debug by default.
 ELOG_DEBUG="off"
 
@@ -177,6 +180,9 @@ $(echo "$GENTOO_PROFILE_LIST" | sed 's/^/          * /')
     --color <bool>                  (default is "$COLOR")
         Enable or disable colors in output.
 
+    --keep-downloads <bool>         (default is "$KEEP_DOWNLOADS")
+        Enable or disable cleaning up files downloaded to /tmp on exit.
+
     --version
         Show version.
 
@@ -208,6 +214,7 @@ opt_config "
     --use-livecd-kernel \
     --use-admincd \
     --color \
+    --keep-downloads \
     --debug \
 "
 
@@ -237,6 +244,7 @@ OPT="$(opt_get "--root-password")";         [ -z "$OPT" ] || ROOT_PASSWORD="$OPT
 OPT="$(opt_get "--use-livecd-kernel")";     [ -z "$OPT" ] || USE_LIVECD_KERNEL="$OPT"
 OPT="$(opt_get "--use-admincd")";           [ -z "$OPT" ] || USE_ADMINCD="$OPT"
 OPT="$(opt_get "--color")";                 [ -z "$OPT" ] || COLOR="$OPT"
+OPT="$(opt_get "--keep-downloads")";        [ -z "$OPT" ] || KEEP_DOWNLOADS="$OPT"
 OPT="$(opt_get "--debug")";                 [ -z "$OPT" ] || ELOG_DEBUG="$OPT"
 
 
@@ -264,12 +272,12 @@ elog_set_colors "$COLOR"
 ################################################################################
 
 handle_exit() {
-    if [ -n "$GENTOO_LIVECD_TMP" ] && [ -e "$GENTOO_LIVECD_TMP" ]; then
-        rm  "$GENTOO_LIVECD_TMP"
-    fi
+    if eoff $KEEP_DOWNLOADS; then
+        edebug "--keep-downloads is off, cleaning up files in /tmp"
 
-    if [ -n "$GUEST_INIT_FILE" ] && [ -e "$GUEST_INIT_FILE" ]; then
-        rm "$GUEST_INIT_FILE"
+        download_distfile_cleanup
+    else
+        edebug "--keep-downloads is enabled, downloads were not removed."
     fi
 }
 
@@ -293,6 +301,8 @@ trap 'handle_error ${LINENO}' ERR
 
 einfo "$APP_DESCRIPTION $APP_VERSION"
 
+edebug "Debug Messages are enabled"
+
 if ! command -v VBoxManage &> /dev/null; then
     edie "VBoxManage is not installed, please install/reinstall VirtualBox"
 fi
@@ -301,7 +311,13 @@ if ! command -v gpg &> /dev/null; then
     edie "GPG is not installed."
 fi
 
-edebug "Debug Messages are enabled"
+# If keep downloads was on last run, but off this run, we should clean up distfiles
+if eoff $KEEP_DOWNLOADS; then
+    edebug "--keep-downloads is off, cleaning up files in /tmp if they exist"
+    download_distfile_cleanup
+fi
+
+
 
 ################################################################################
 # PHASE 1: Prepare Instance...
