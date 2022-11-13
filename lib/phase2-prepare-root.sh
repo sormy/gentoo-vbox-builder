@@ -11,6 +11,8 @@
 
 set -e
 
+edebug "Debug Messages sucessfully enabled in Phase 2"
+
 ################################################################################
 
 einfo "Synchronizing time..."

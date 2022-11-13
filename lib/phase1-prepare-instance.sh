@@ -23,6 +23,8 @@
 
 set -e
 
+edebug "Debug Messages sucessfully enabled in Phase 1"
+
 ################################################################################
 
 if VBoxManage list runningvms | grep -q '^"'"$GUEST_NAME"'"'; then

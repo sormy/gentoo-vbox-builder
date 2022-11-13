@@ -12,6 +12,8 @@
 
 set -e
 
+edebug "Debug Messages sucessfully enabled in Phase 3"
+
 ################################################################################
 
 # detect kernel config file that should be used for bootstrap

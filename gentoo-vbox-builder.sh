@@ -105,6 +105,9 @@ SSH_OPTS="-o ConnectTimeout=5
 # Enable color by default.
 COLOR="on"
 
+# Disable Debug by default.
+ELOG_DEBUG="off"
+
 ################################################################################
 
 show_help() {
@@ -205,6 +208,7 @@ opt_config "
     --use-livecd-kernel \
     --use-admincd \
     --color \
+    --debug \
 "
 
 opt_parse "$@"
@@ -233,6 +237,8 @@ OPT="$(opt_get "--root-password")";         [ -z "$OPT" ] || ROOT_PASSWORD="$OPT
 OPT="$(opt_get "--use-livecd-kernel")";     [ -z "$OPT" ] || USE_LIVECD_KERNEL="$OPT"
 OPT="$(opt_get "--use-admincd")";           [ -z "$OPT" ] || USE_ADMINCD="$OPT"
 OPT="$(opt_get "--color")";                 [ -z "$OPT" ] || COLOR="$OPT"
+OPT="$(opt_get "--debug")";                 [ -z "$OPT" ] || ELOG_DEBUG="$OPT"
+
 
 # Autodetect Gentoo architecture based on profile name.
 GENTOO_ARCH="$(echo "$GENTOO_STAGE3" | grep -q '^\(amd64\|x32\)' && echo "amd64" || echo "x86")"
@@ -295,6 +301,8 @@ if ! command -v gpg &> /dev/null; then
     edie "GPG is not installed."
 fi
 
+edebug "Debug Messages are enabled"
+
 ################################################################################
 # PHASE 1: Prepare Instance...
 
@@ -340,6 +348,7 @@ cat "$SCRIPT_DIR/lib/elib.sh" \
         "ELOG_COLOR_ERROR=\"$ELOG_COLOR_ERROR\"" \
         "ELOG_COLOR_QUOTE=\"$ELOG_COLOR_QUOTE\"" \
         "ELOG_COLOR_RESET=\"$ELOG_COLOR_RESET\"" \
+        "ELOG_DEBUG=\"$ELOG_DEBUG\"" \
         "GENTOO_MIRROR=\"$GENTOO_MIRROR\"" \
         "GENTOO_STAGE3=\"$GENTOO_STAGE3\"" \
         "GENTOO_ARCH=\"$GENTOO_ARCH\"" \
@@ -371,6 +380,7 @@ cat "$SCRIPT_DIR/lib/elib.sh" \
         "ELOG_COLOR_ERROR=\"$ELOG_COLOR_ERROR\"" \
         "ELOG_COLOR_QUOTE=\"$ELOG_COLOR_QUOTE\"" \
         "ELOG_COLOR_RESET=\"$ELOG_COLOR_RESET\"" \
+        "ELOG_DEBUG=\"$ELOG_DEBUG\"" \
         "USE_LIVECD_KERNEL=\"$USE_LIVECD_KERNEL\"" \
         "TARGET_DISK=\"$TARGET_DISK\"" \
         "SSH_PUBLIC_KEY=\"$SSH_PUBLIC_KEY\"" \
