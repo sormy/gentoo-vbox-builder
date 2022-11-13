@@ -283,8 +283,20 @@ trap 'handle_exit' EXIT
 trap 'handle_error ${LINENO}' ERR
 
 ################################################################################
+# Initialization & Dependency check
 
 einfo "$APP_DESCRIPTION $APP_VERSION"
+
+if ! command -v VBoxManage &> /dev/null; then
+    edie "VBoxManage is not installed, please install/reinstall VirtualBox"
+fi
+
+if ! command -v gpg &> /dev/null; then
+    edie "GPG is not installed."
+fi
+
+################################################################################
+# PHASE 1: Prepare Instance...
 
 einfo "The following parameters will be used:"
 
