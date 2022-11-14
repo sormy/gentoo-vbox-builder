@@ -12,6 +12,8 @@ download_distfile_safe() {
     local url="$1"
     local file="$2"
 
+    edebug "Download URL: $url"
+    edebug "Download File: $file"
     local expected_hash
     local actual_hash
     local hash
@@ -39,7 +41,7 @@ download_distfile_safe() {
                 eerror "$hash hash verification failed."
                 eerror "Expected $hash: $expected_hash"
                 eerror "Actual $hash: $actual_hash"
-                edebug "Removingto force download on next run"
+                edebug "Cleaning up faulty distfiles ..."
                 download_distfile_cleanup
                 exit 1
             else

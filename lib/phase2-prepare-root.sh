@@ -71,77 +71,10 @@ einfo "Installing stage3..."
 
 eindent
 
-unset STAGE3_PATH_PROFILE
-case "${GENTOO_PROFILE}" in
-	*musl*)
-		if [[ -n $STAGE3_PATH_PROFILE ]]; then
-			STAGE3_PATH_PROFILE="${STAGE3_PATH_PROFILE}-musl"
-		else
-			STAGE3_PATH_PROFILE="musl"
-		fi
-		;&
-	*clang*)
-		if [[ -n $STAGE3_PATH_PROFILE ]]; then
-			STAGE3_PATH_PROFILE="${STAGE3_PATH_PROFILE}-clang"
-		else
-			STAGE3_PATH_PROFILE="clang"
-		fi
-		;&
-	*hardened*)
-		if [[ -n $STAGE3_PATH_PROFILE ]]; then
-			STAGE3_PATH_PROFILE="${STAGE3_PATH_PROFILE}-hardened"
-		else
-			STAGE3_PATH_PROFILE="hardened"
-		fi
-		;&
-	*nomultilib*)
-		if [[ -n $STAGE3_PATH_PROFILE ]]; then
-			STAGE3_PATH_PROFILE="${STAGE3_PATH_PROFILE}-nomultilib"
-		else
-			STAGE3_PATH_PROFILE="nomultilib"
-		fi
-		;&
-	*selinux*)
-		if [[ -n $STAGE3_PATH_PROFILE ]]; then
-			STAGE3_PATH_PROFILE="${STAGE3_PATH_PROFILE}-selinux"
-		else
-			STAGE3_PATH_PROFILE="selinux"
-		fi
-		;&
-	*desktop*)
-		if [[ -n $STAGE3_PATH_PROFILE ]]; then
-			STAGE3_PATH_PROFILE="${STAGE3_PATH_PROFILE}-desktop"
-		else
-			STAGE3_PATH_PROFILE="desktop"
-		fi
-		;&
-esac
-
-
-if eon "$GENTOO_SYSTEMD"; then
-	if [[ $STAGE3_PATH_PROFILE ]]; then
-		STAGE3_PATH_PROFILE="${STAGE3_PATH_PROFILE}-systemd"
-	else
-		STAGE3_PATH_PROFILE="systemd"
-	fi
-else
-	if [[ $STAGE3_PATH_PROFILE ]]; then
-		STAGE3_PATH_PROFILE="${STAGE3_PATH_PROFILE}-openrc"
-	else
-		STAGE3_PATH_PROFILE="openrc"
-	fi
-fi
-
-
-eecho "Specified Profile: $GENTOO_PROFILE"
-eecho "Download Profile:  $STAGE3_PATH_PROFILE"
-
-STAGE3_PATH_URL="$GENTOO_MIRROR/releases/$GENTOO_ARCH/autobuilds/latest-stage3-$GENTOO_STAGE3-$STAGE3_PATH_PROFILE.txt"
+STAGE3_PATH_URL="$GENTOO_MIRROR/releases/$GENTOO_ARCH/autobuilds/latest-stage3-$GENTOO_STAGE3.txt"
 STAGE3_PATH="$(curl -s "$STAGE3_PATH_URL" | grep -v "^#" | cut -d" " -f1)"
 STAGE3_URL="$GENTOO_MIRROR/releases/$GENTOO_ARCH/autobuilds/$STAGE3_PATH"
 STAGE3_FILE="$(basename "$STAGE3_URL")"
-
-einfo "Downloading: $STAGE3_URL ..."
 
 download_distfile_safe "$STAGE3_URL" "$STAGE3_FILE"
 

@@ -27,7 +27,7 @@ GENTOO_GPG_SERVER="${GENTOO_GPG_SERVER:-hkps://keys.gentoo.org}"
 GENTOO_GPG_KEYS="$(cat "$SCRIPT_DIR/gentoo-gpg-keys.txt" | grep -v '^#')"
 
 # Gentoo stage3.
-GENTOO_STAGE3="amd64"
+GENTOO_STAGE3="amd64-openrc"
 
 # Gentoo profile. Blank indicates that stage3 default profile should be used.
 GENTOO_PROFILE=""
