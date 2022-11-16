@@ -223,6 +223,25 @@ fi
 
 ################################################################################
 
+if eon $INSTALL_SYSLOG; then
+    if eoff "$GENTOO_SYSTEMD"; then
+        einfo "Installing system logger..."
+        eexec emerge $EMERGE_OPTS "app-admin/sysklogd"
+        eexec rc-update add sysklogd default
+    else
+        edebug "Skiping installing system logger, in preferance of systemd's built in one"
+    fi
+fi
+################################################################################
+
+if eon $INSTALL_CRON; then 
+    einfo "Installing Cron"
+    eexec emerge $EMERGE_OPTS "sys-process/cronie"
+    eexec rc-update add cronie
+fi 
+
+################################################################################
+
 if [ -z "$ROOT_PASSWORD" ]; then
     einfo "Removing root password..."
     eexec passwd -d -l root

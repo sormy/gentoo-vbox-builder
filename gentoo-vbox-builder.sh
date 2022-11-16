@@ -111,6 +111,12 @@ KEEP_DOWNLOADS="off"
 # Disable Debug by default.
 ELOG_DEBUG="off"
 
+# Disable installing cron by default 
+INSTALL_CRON="off"
+
+# Disable installing a sys log by default
+INSTALL_SYSLOG="off"
+
 ################################################################################
 
 show_help() {
@@ -183,6 +189,12 @@ $(echo "$GENTOO_PROFILE_LIST" | sed 's/^/          * /')
     --keep-downloads <bool>         (default is "$KEEP_DOWNLOADS")
         Enable or disable cleaning up files downloaded to /tmp on exit.
 
+    --install-cron <bool>           (default is "$INSTALL_CRON")
+        Enable or disable installing a cron daemon (cronie)
+
+    --install-syslog <bool>         (default is "$INSTALL_SYSLOG")
+        Enable or disable installing a System logger (sysklogd)
+
     --version
         Show version.
 
@@ -216,6 +228,8 @@ opt_config "
     --color \
     --keep-downloads \
     --debug \
+    --install-cron \
+    --install-syslog \
 "
 
 opt_parse "$@"
@@ -246,6 +260,8 @@ OPT="$(opt_get "--use-admincd")";           [ -z "$OPT" ] || USE_ADMINCD="$OPT"
 OPT="$(opt_get "--color")";                 [ -z "$OPT" ] || COLOR="$OPT"
 OPT="$(opt_get "--keep-downloads")";        [ -z "$OPT" ] || KEEP_DOWNLOADS="$OPT"
 OPT="$(opt_get "--debug")";                 [ -z "$OPT" ] || ELOG_DEBUG="$OPT"
+OPT="$(opt_get "--install-cron")";          [ -z "$OPT" ] || INSTALL_CRON="$OPT"
+OPT="$(opt_get "--install-syslog")";        [ -z "$OPT" ] || INSTALL_SYSLOG="$OPT"
 
 
 # Autodetect Gentoo architecture based on profile name.
@@ -407,6 +423,8 @@ cat "$SCRIPT_DIR/lib/elib.sh" \
         "GENTOO_STAGE3=\"$GENTOO_STAGE3\"" \
         "GENTOO_PROFILE=\"$GENTOO_PROFILE\"" \
         "GENTOO_SYSTEMD=\"$GENTOO_SYSTEMD\"" \
+        "INSTALL_SYSLOG=\"$INSTALL_SYSLOG\"" \
+        "INSTALL_CRON=\"$INSTALL_CRON\"" \
         "chroot /mnt/gentoo bash -s"
 
 ################################################################################
