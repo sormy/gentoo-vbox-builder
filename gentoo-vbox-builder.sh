@@ -17,7 +17,7 @@ source "$SCRIPT_DIR/lib/distfiles.sh"
 
 APP_NAME="gentoo-vbox-builder"
 APP_DESCRIPTION="Gentoo VirtualBox Image Builder"
-APP_VERSION="1.0.8"
+APP_VERSION="1.0.9"
 
 # Gentoo mirror.
 GENTOO_MIRROR="http://distfiles.gentoo.org"
