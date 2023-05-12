@@ -15,12 +15,6 @@ edebug "Debug Messages sucessfully enabled in Phase 2"
 
 ################################################################################
 
-einfo "Synchronizing time..."
-
-eexec ntpd -gq
-
-################################################################################
-
 einfo "Preparing disk..."
 
 eindent
