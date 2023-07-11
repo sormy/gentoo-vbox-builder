@@ -22,7 +22,7 @@ Usually you just need to run script and wait until it will finish the job:
 ./gentoo-vbox-builder.sh
 ```
 
-By default, root password will be `Gentoo123` and locally available ssh public
+By default, root password will be `Gentoo.Built.123` and locally available ssh public
 key will be also installed for password-less authentication over SSH.
 
 Some options could be helpful to solve different problems and speedup the process:
