@@ -23,6 +23,8 @@
 
 set -e
 
+edebug "Debug Messages sucessfully enabled in Phase 1"
+
 ################################################################################
 
 if VBoxManage list runningvms | grep -q '^"'"$GUEST_NAME"'"'; then
@@ -160,8 +162,9 @@ sleep 10
 
 einfo "Booting Gentoo from LiveCD..."
 
-eexec VBoxManage controlvm "$GUEST_NAME" \
-    keyboardputstring $'gentoo nokeymap vga=786\n'
+# Commented out since Gentoo LiveCD now uses grub instead of syslinux
+#eexec VBoxManage controlvm "$GUEST_NAME" \
+#    keyboardputstring $'gentoo nokeymap vga=786\n'
 
 sleep 60
 

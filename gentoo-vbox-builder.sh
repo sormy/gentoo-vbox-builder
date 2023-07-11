@@ -17,7 +17,7 @@ source "$SCRIPT_DIR/lib/distfiles.sh"
 
 APP_NAME="gentoo-vbox-builder"
 APP_DESCRIPTION="Gentoo VirtualBox Image Builder"
-APP_VERSION="1.0.8"
+APP_VERSION="1.0.9"
 
 # Gentoo mirror.
 GENTOO_MIRROR="http://distfiles.gentoo.org"
@@ -27,7 +27,7 @@ GENTOO_GPG_SERVER="${GENTOO_GPG_SERVER:-hkps://keys.gentoo.org}"
 GENTOO_GPG_KEYS="$(cat "$SCRIPT_DIR/gentoo-gpg-keys.txt" | grep -v '^#')"
 
 # Gentoo stage3.
-GENTOO_STAGE3="amd64"
+GENTOO_STAGE3="amd64-openrc"
 
 # Gentoo profile. Blank indicates that stage3 default profile should be used.
 GENTOO_PROFILE=""
@@ -105,6 +105,18 @@ SSH_OPTS="-o ConnectTimeout=5
 # Enable color by default.
 COLOR="on"
 
+# Disable Keeping of Downloads by default
+KEEP_DOWNLOADS="off"
+
+# Disable Debug by default.
+ELOG_DEBUG="off"
+
+# Disable installing cron by default 
+INSTALL_CRON="off"
+
+# Disable installing a sys log by default
+INSTALL_SYSLOG="off"
+
 ################################################################################
 
 show_help() {
@@ -174,6 +186,15 @@ $(echo "$GENTOO_PROFILE_LIST" | sed 's/^/          * /')
     --color <bool>                  (default is "$COLOR")
         Enable or disable colors in output.
 
+    --keep-downloads <bool>         (default is "$KEEP_DOWNLOADS")
+        Enable or disable cleaning up files downloaded to /tmp on exit.
+
+    --install-cron <bool>           (default is "$INSTALL_CRON")
+        Enable or disable installing a cron daemon (cronie)
+
+    --install-syslog <bool>         (default is "$INSTALL_SYSLOG")
+        Enable or disable installing a System logger (sysklogd)
+
     --version
         Show version.
 
@@ -205,6 +226,10 @@ opt_config "
     --use-livecd-kernel \
     --use-admincd \
     --color \
+    --keep-downloads \
+    --debug \
+    --install-cron \
+    --install-syslog \
 "
 
 opt_parse "$@"
@@ -233,6 +258,11 @@ OPT="$(opt_get "--root-password")";         [ -z "$OPT" ] || ROOT_PASSWORD="$OPT
 OPT="$(opt_get "--use-livecd-kernel")";     [ -z "$OPT" ] || USE_LIVECD_KERNEL="$OPT"
 OPT="$(opt_get "--use-admincd")";           [ -z "$OPT" ] || USE_ADMINCD="$OPT"
 OPT="$(opt_get "--color")";                 [ -z "$OPT" ] || COLOR="$OPT"
+OPT="$(opt_get "--keep-downloads")";        [ -z "$OPT" ] || KEEP_DOWNLOADS="$OPT"
+OPT="$(opt_get "--debug")";                 [ -z "$OPT" ] || ELOG_DEBUG="$OPT"
+OPT="$(opt_get "--install-cron")";          [ -z "$OPT" ] || INSTALL_CRON="$OPT"
+OPT="$(opt_get "--install-syslog")";        [ -z "$OPT" ] || INSTALL_SYSLOG="$OPT"
+
 
 # Autodetect Gentoo architecture based on profile name.
 GENTOO_ARCH="$(echo "$GENTOO_STAGE3" | grep -q '^\(amd64\|x32\)' && echo "amd64" || echo "x86")"
@@ -258,12 +288,12 @@ elog_set_colors "$COLOR"
 ################################################################################
 
 handle_exit() {
-    if [ -n "$GENTOO_LIVECD_TMP" ] && [ -e "$GENTOO_LIVECD_TMP" ]; then
-        rm  "$GENTOO_LIVECD_TMP"
-    fi
+    if eoff $KEEP_DOWNLOADS; then
+        edebug "--keep-downloads is off, cleaning up files in /tmp"
 
-    if [ -n "$GUEST_INIT_FILE" ] && [ -e "$GUEST_INIT_FILE" ]; then
-        rm "$GUEST_INIT_FILE"
+        download_distfile_cleanup
+    else
+        edebug "--keep-downloads is enabled, downloads were not removed."
     fi
 }
 
@@ -283,8 +313,30 @@ trap 'handle_exit' EXIT
 trap 'handle_error ${LINENO}' ERR
 
 ################################################################################
+# Initialization & Dependency check
 
 einfo "$APP_DESCRIPTION $APP_VERSION"
+
+edebug "Debug Messages are enabled"
+
+if ! command -v VBoxManage &> /dev/null; then
+    edie "VBoxManage is not installed, please install/reinstall VirtualBox"
+fi
+
+if ! command -v gpg &> /dev/null; then
+    edie "GPG is not installed."
+fi
+
+# If keep downloads was on last run, but off this run, we should clean up distfiles
+if eoff $KEEP_DOWNLOADS; then
+    edebug "--keep-downloads is off, cleaning up files in /tmp if they exist"
+    download_distfile_cleanup
+fi
+
+
+
+################################################################################
+# PHASE 1: Prepare Instance...
 
 einfo "The following parameters will be used:"
 
@@ -328,6 +380,7 @@ cat "$SCRIPT_DIR/lib/elib.sh" \
         "ELOG_COLOR_ERROR=\"$ELOG_COLOR_ERROR\"" \
         "ELOG_COLOR_QUOTE=\"$ELOG_COLOR_QUOTE\"" \
         "ELOG_COLOR_RESET=\"$ELOG_COLOR_RESET\"" \
+        "ELOG_DEBUG=\"$ELOG_DEBUG\"" \
         "GENTOO_MIRROR=\"$GENTOO_MIRROR\"" \
         "GENTOO_STAGE3=\"$GENTOO_STAGE3\"" \
         "GENTOO_ARCH=\"$GENTOO_ARCH\"" \
@@ -359,6 +412,7 @@ cat "$SCRIPT_DIR/lib/elib.sh" \
         "ELOG_COLOR_ERROR=\"$ELOG_COLOR_ERROR\"" \
         "ELOG_COLOR_QUOTE=\"$ELOG_COLOR_QUOTE\"" \
         "ELOG_COLOR_RESET=\"$ELOG_COLOR_RESET\"" \
+        "ELOG_DEBUG=\"$ELOG_DEBUG\"" \
         "USE_LIVECD_KERNEL=\"$USE_LIVECD_KERNEL\"" \
         "TARGET_DISK=\"$TARGET_DISK\"" \
         "SSH_PUBLIC_KEY=\"$SSH_PUBLIC_KEY\"" \
@@ -369,6 +423,8 @@ cat "$SCRIPT_DIR/lib/elib.sh" \
         "GENTOO_STAGE3=\"$GENTOO_STAGE3\"" \
         "GENTOO_PROFILE=\"$GENTOO_PROFILE\"" \
         "GENTOO_SYSTEMD=\"$GENTOO_SYSTEMD\"" \
+        "INSTALL_SYSLOG=\"$INSTALL_SYSLOG\"" \
+        "INSTALL_CRON=\"$INSTALL_CRON\"" \
         "chroot /mnt/gentoo bash -s"
 
 ################################################################################

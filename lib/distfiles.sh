@@ -12,14 +12,21 @@ download_distfile_safe() {
     local url="$1"
     local file="$2"
 
+    edebug "Download URL: $url"
+    edebug "Download File: $file"
     local expected_hash
     local actual_hash
     local hash
     local hash_verified=0
 
-    eexec curl $CURL_OPTS \
-        -o "$file" "$url" \
+    if [[ -f "$file" && -f "$file.DIGESTS" ]]; then 
+        edebug "Found $file and $file.DIGESTS, skiping download"
+    else
+        edebug "Did not find both $file and $file.DIGESTS, downloading now."
+        eexec curl $CURL_OPTS \
+            -o "$file" "$url" \
         -o "$file.DIGESTS" "$url.DIGESTS"
+    fi
 
     for hash in sha512 whirlpool; do
         expected_hash="$(grep -i "$hash" -A 1 < "$file.DIGESTS" \
@@ -34,6 +41,8 @@ download_distfile_safe() {
                 eerror "$hash hash verification failed."
                 eerror "Expected $hash: $expected_hash"
                 eerror "Actual $hash: $actual_hash"
+                edebug "Cleaning up faulty distfiles ..."
+                download_distfile_cleanup
                 exit 1
             else
                 hash_verified=1
@@ -53,3 +62,16 @@ download_distfile_safe() {
     eexec gpg --verify "$file.DIGESTS" \
         || edie "GPG signature verification failed."
 }
+
+download_distfile_cleanup() {
+    if [ -n "$GENTOO_LIVECD_TMP" ] && [ -e "$GENTOO_LIVECD_TMP" ]; then
+        edebug "Removing $GENTOO_LIVECD_TMP"
+        rm  "$GENTOO_LIVECD_TMP"
+    fi
+
+    if [ -n "$GUEST_INIT_FILE" ] && [ -e "$GUEST_INIT_FILE" ]; then
+        edebug "Removing $GUEST_INIT_FILE"
+        rm "$GUEST_INIT_FILE"
+    fi
+}
+

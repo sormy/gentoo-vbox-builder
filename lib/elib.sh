@@ -11,6 +11,7 @@ COLOR_RESET=$'\033[00m'
 # global ELOG_COLOR_ERROR
 # global ELOG_COLOR_QUOTE
 # global ELOG_COLOR_RESET
+# global ELOF_DEBUG
 
 eon() {
     echo "$1" | grep -q -i '^\(1\|yes\|true\|on\)$'
@@ -148,3 +149,10 @@ eexec() {
 
     return $error_code
 }
+
+edebug() {
+    if eon "$ELOG_DEBUG"; then
+        echo " ${ELOG_COLOR_OK}D${ELOG_COLOR_RESET}${ELOG_INDENT}" "$@"
+    fi
+}
+

@@ -12,6 +12,8 @@
 
 set -e
 
+edebug "Debug Messages sucessfully enabled in Phase 3"
+
 ################################################################################
 
 # detect kernel config file that should be used for bootstrap
@@ -218,6 +220,25 @@ END
     eexec ln -snf /run/systemd/resolve/resolv.conf /etc/resolv.conf
     eexec systemctl enable systemd-resolved
 fi
+
+################################################################################
+
+if eon $INSTALL_SYSLOG; then
+    if eoff "$GENTOO_SYSTEMD"; then
+        einfo "Installing system logger..."
+        eexec emerge $EMERGE_OPTS "app-admin/sysklogd"
+        eexec rc-update add sysklogd default
+    else
+        edebug "Skiping installing system logger, in preferance of systemd's built in one"
+    fi
+fi
+################################################################################
+
+if eon $INSTALL_CRON; then 
+    einfo "Installing Cron"
+    eexec emerge $EMERGE_OPTS "sys-process/cronie"
+    eexec rc-update add cronie
+fi 
 
 ################################################################################
 
