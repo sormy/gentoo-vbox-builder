@@ -148,6 +148,17 @@ and livecd/compiled kernel support:
 - --gentoo-stage3 amd64-systemd --use-livecd-kernel no
 - --gentoo-stage3 i686 --use-livecd-kernel yes
 - --gentoo-stage3 i686-systemd --use-livecd-kernel no
+## TODO
+1. 修改磁盘大小为 100G
+2. 修改网卡为桥接
+3. 修改显卡为VMSVGA
+4. 修改 hostname
+5. 
+
+
+ 
+ 
+
 
 Contributions must be licensed under the MIT.
 
