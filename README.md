@@ -117,6 +117,8 @@ try to use different GPG server, for example:
 ```
 GENTOO_GPG_SERVER="ipv4.pool.sks-keyservers.net" ./gentoo-vbox-builder.sh ...
 ```
+Other GPG server: `trogan.keys.gentoo.org; motmot.keys.gentoo.org; kookaburra.keys.gentoo.org`
+
 
 ## Screenshots
 
